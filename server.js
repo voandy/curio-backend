@@ -25,7 +25,7 @@ mongoose
   .catch(err => console.log(err));
 
 // assign and use user routes
-const userRoutes = require("./routes/api/user");
+const userRoutes = require("./routes/api/User");
 app.use('/api/user', userRoutes);
 
 // listen
