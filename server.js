@@ -24,6 +24,10 @@ mongoose
   .then(() => console.log("MongoDB successfully connected"))
   .catch(err => console.log(err));
 
+// assign and use user routes
+const userRoutes = require("./routes/api/user");
+app.use('/api/user', userRoutes);
+
 // listen
 const port = process.env.PORT || 5001;
 app.listen(port, function(){

@@ -5,8 +5,8 @@ const jwt = require("jsonwebtoken");
 const keys = require("../../config/keys");
 
 // load input validation
-const validateRegisterInput = require("../../validation/register");
-const validateLoginInput = require("../../validation/login");
+const validateRegisterInput = require("../../services/validation/register");
+const validateLoginInput = require("../../services/validation/login");
 
 // load User model
 const User = require("../../models/User");
@@ -39,7 +39,7 @@ router.get('/id/:id', function(req,res) {
 // delete user by id
 router.delete('/id/:id', function(req,res) {
     var userId = req.params.id;
-    User.deletedById(userId, function(err, user) {
+    User.findByIdAndRemove(userId, function(err, user) {
       if(!err) {
         res.send(userId + "is deleted");
       }
