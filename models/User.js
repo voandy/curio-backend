@@ -17,7 +17,7 @@ const userSchema = new Schema(
       type: String,
       required: true
     },
-    
+
     dateJoined:{type: Date, default: Date.now},
   }
 );

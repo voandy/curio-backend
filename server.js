@@ -1,8 +1,13 @@
 const express = require('express');
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
 
 const app = express();
+
+// connect to MongoDB Atlas
+require('./models/db.js');
+
+// routes setup
+const userRoutes = require("./routes/user-routes.js");
 
 // Bodyparser middleware
 app.use(
@@ -12,21 +17,7 @@ app.use(
   );
 app.use(bodyParser.json());
 
-// DB Config
-const db = require("./config/keys").mongoURI;
-
-// Connect to MongoDB
-mongoose
-  .connect(
-    db,
-    { useNewUrlParser: true }
-  )
-  .then(() => console.log("MongoDB successfully connected"))
-  .catch(err => console.log(err));
-
-// assign and use user routes
-const userRoutes = require("./routes/api/User");
-app.use('/api/user', userRoutes);
+app.use('/api', userRoutes);
 
 // listen
 const port = process.env.PORT || 5001;
