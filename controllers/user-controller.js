@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
+
 // load User model
 const User = mongoose.model("User");
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const keys = require("../config/keys");
+const keys = require("../config/secret_keys.js");
 
 // load input validation
 const validateRegisterInput = require("../services/validation/register");
@@ -15,8 +16,7 @@ var getAll = function(req,res){
   User.find(function(err, users) {
     if (!err) {
       res.send(users);
-    }
-    else {
+    } else {
       res.sendStatus(404);
     }
   });
@@ -28,8 +28,7 @@ var getById = function(req,res){
   User.findById(userId, function(err, user){
     if (!err) {
       res.send(user);
-    }
-    else {
+    } else {
       res.sendStatus(404);
     }
   });
@@ -41,8 +40,7 @@ var deleteById = function (req,res) {
   User.findByIdAndRemove(userId, function(err, user) {
     if(!err) {
       res.send(userId + "is deleted");
-    }
-    else{
+    } else{
       res.sendStatus(404);
     }
   })
@@ -54,8 +52,7 @@ var updateById = function(req,res){
   User.findByIdAndUpdate(userId, req.body, function(err, user) {
     if(!err) {
       res.send(userId + "is updated");
-    }
-    else {
+    } else {
       res.sendStatus(404);
     }
   });
@@ -67,8 +64,7 @@ var getByEmail = function(req,res){
   User.find({email: userEmail}, function(err, user) {
     if(!err) {
       res.send(user);
-    }
-    else {
+    } else {
       res.sendStatus(404);
     }
   });
@@ -88,8 +84,7 @@ var register = function(req,res){
   User.findOne({ email: req.body.email }).then(user => {
     if (user) {
       return res.status(400).json({ email: "Email already exists" });
-    }
-    else {
+    } else {
       const newUser = new User({
         name: req.body.name,
         email: req.body.email,
@@ -168,11 +163,11 @@ var login = function(req,res){
 };
 
 module.exports = {
-   getAll,
-   getById,
-   deleteById,
-   updateById,
-   getByEmail,
-   register,
-   login
+  getAll,
+  getById,
+  deleteById,
+  updateById,
+  getByEmail,
+  register,
+  login
 }

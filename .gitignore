@@ -6,7 +6,7 @@
 .DS_Store
 
 # Secret Keys
-config/atlas_key.js
+config/secret_keys.js
 
 ### Node ###
 # Logs

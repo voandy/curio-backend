@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 // DB Config
-const db = require("../config/keys").mongoURI;
+const db = require("../config/secret_keys.js").mongoURI;
 
 // Connect to MongoDB
 mongoose.connect(db, { useNewUrlParser: true }).then(
@@ -9,5 +9,5 @@ mongoose.connect(db, { useNewUrlParser: true }).then(
   err => { console.log(err) }
 );
 
-// assign and use user routes
 require('./User.js');
+require('./Artefact.js');
