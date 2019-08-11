@@ -13,5 +13,7 @@ router.get('/artefact/id/:id', artefactCont.getById);
 router.delete('/artefact/id/:id', artefactCont.deleteById);
 // update user by id
 router.put('/artefact/id/:id', artefactCont.updateById);
+// create new artefact
+router.post('/artefact', artefactCont.create);
 
 module.exports = router;

@@ -6,10 +6,11 @@ const artefactSchema = new Schema(
     // owner id, foreign key
     userId: String,
 
-    Title: { type: String, required: true },
-    Description: { type: String, required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    category: { type: String, required: true },
 
-    dateAdded: { type: Date, default: Date.now },
+    datePosted: { type: Date, default: Date.now },
     dateObtained: Date,
 
     // current location
@@ -23,7 +24,7 @@ const artefactSchema = new Schema(
     obtLat: Number,
 
     // url of the images
-    imageURLs:[String],
+    imageURLs: [String],
 
     // list of user ids who've liked
     likes: [String]

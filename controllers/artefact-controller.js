@@ -50,9 +50,43 @@ var updateById = function(req,res){
   });
 };
 
+// create artefact
+var create = function (req,res) {
+  // create the listing
+  var artefact = new Artefact({
+    userId: req.body.userId,
+
+    title: req.body.title,
+    description: req.body.description,
+    category: req.body.category,
+
+    datePosted: new Date(),
+    dateObtained: new Date(req.body.dateObtained),
+
+    currLoc: req.body.currLoc,
+    currLng: req.body.currLng,
+    currLat: req.body.currLat,
+
+    // obtained location
+    obtLoc: req.body.obtLoc,
+    obtLng: req.body.obtLng,
+    obtLat: req.body.obtLat,
+  });
+
+  // send it to database
+  artefact.save(function (err, newArtefact) {
+    if(!err){
+      res.send(newArtefact);
+    }else{
+      res.status(400).send(err);
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
   deleteById,
-  updateById
+  updateById,
+  create
 }
