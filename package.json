@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "IT Project Backend",
+  "description": "Curio Backend",
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js"
@@ -22,5 +22,8 @@
   },
   "devDependencies": {
     "nodemon": "^1.19.1"
+  },
+  "scripts": {
+    "start": "node server.js"
   }
 }
