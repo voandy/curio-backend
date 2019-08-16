@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 
 // DB Config
-const db = require("../config/secret_keys.js").mongoURI;
+const dbURI = process.env.CURIODBURI;
 
 // Connect to MongoDB
-mongoose.connect(db, { useNewUrlParser: true }).then(
+mongoose.connect(dbURI, { useNewUrlParser: true }).then(
   () => { console.log("MongoDB successfully connected") },
   err => { console.log(err) }
 );
