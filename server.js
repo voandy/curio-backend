@@ -20,6 +20,10 @@ app.use(
   );
 app.use(bodyParser.json());
 
+app.get('/', function(req,res) {
+  res.send("Welcome to Curio!");
+});
+
 app.use('/api', userRoutes);
 app.use('/api', artefactRoutes);
 

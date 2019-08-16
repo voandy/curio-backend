@@ -5,7 +5,8 @@ const User = mongoose.model("User");
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const keys = require("../config/secret_keys.js");
+
+const secretOrKey = process.env.secretOrKey;
 
 // load input validation
 const validateRegisterInput = require("../services/validation/register");
@@ -142,7 +143,7 @@ var login = function(req,res){
         // Sign token
         jwt.sign(
           payload,
-          keys.secretOrKey,
+          secretOrKey,
           {
             expiresIn: 31556926 // 1 year in seconds
           },
