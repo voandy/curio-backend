@@ -29,7 +29,7 @@ var getById = function(req,res){
 // delete artefact by id
 var deleteById = function (req,res) {
   var artefactId = req.params.id;
-  Artefact.findByIdAndRemove(artefactId, function(err, artefact) {
+  Artefact.findByIdAndDelete(artefactId, function(err, artefact) {
     if(!err) {
       res.send(artefactId + "is deleted");
     } else {
@@ -52,7 +52,7 @@ var updateById = function(req,res){
 
 // create artefact
 var create = function (req,res) {
-  // create the listing
+  // create the artefact
   var artefact = new Artefact({
     userId: req.body.userId,
 
@@ -71,6 +71,10 @@ var create = function (req,res) {
     obtLoc: req.body.obtLoc,
     obtLng: req.body.obtLng,
     obtLat: req.body.obtLat,
+
+    imageURLs: [],
+    likes: [],
+    comments: []
   });
 
   // send it to database

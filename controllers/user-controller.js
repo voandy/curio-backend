@@ -38,7 +38,7 @@ var getById = function(req,res){
 // delete user by id
 var deleteById = function (req,res) {
   var userId = req.params.id;
-  User.findByIdAndRemove(userId, function(err, user) {
+  User.findByIdAndDelete(userId, function(err, user) {
     if(!err) {
       res.send(userId + "is deleted");
     } else{
@@ -89,7 +89,11 @@ var register = function(req,res){
       const newUser = new User({
         name: req.body.name,
         email: req.body.email,
-        password: req.body.password
+        password: req.body.password,
+
+        dateJoined: new Date(),
+        comments: [],
+        subCollections: []
       });
 
       // Hash password before saving in database

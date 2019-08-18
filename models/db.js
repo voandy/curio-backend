@@ -11,3 +11,5 @@ mongoose.connect(dbURI, { useNewUrlParser: true }).then(
 
 require('./User.js');
 require('./Artefact.js');
+require('./Collection.js');
+require('./Comment.js');

@@ -11,6 +11,7 @@ require('./models/db.js');
 // routes setup
 const userRoutes = require("./routes/user-routes.js");
 const artefactRoutes = require("./routes/artefact-routes.js");
+const collectionRoutes = require("./routes/collection-routes.js");
 
 // Bodyparser middleware
 app.use(
@@ -26,6 +27,7 @@ app.get('/', function(req,res) {
 
 app.use('/api', userRoutes);
 app.use('/api', artefactRoutes);
+app.use('/api', collectionRoutes);
 
 // listen
 app.listen(port, function(){

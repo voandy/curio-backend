@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const artefactSchema = new Schema(
   {
     // owner id, foreign key
-    userId: String,
+    userId: { type: String, required: true },
 
     title: { type: String, required: true },
     description: { type: String, required: true },
@@ -27,7 +27,10 @@ const artefactSchema = new Schema(
     imageURLs: [String],
 
     // list of user ids who've liked
-    likes: [String]
+    likes: [String],
+
+    // list of comments made on this artefact
+    comments: [String]
   }
 );
 

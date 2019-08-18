@@ -6,9 +6,17 @@ const userSchema = new Schema(
     email: { type: String, required: true },
     name: { type: String, required: true },
     password: { type: String, required: true },
+
     dateJoined: { type: Date, default: Date.now },
     dob: Date,
-    profilePic: String
+
+    profilePic: String,
+
+    // list of comment ids made on this User
+    comments: [String],
+
+    // list of collection ids to which this user has subscribed
+    subCollections: [String]
   }
 );
 
