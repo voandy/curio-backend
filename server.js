@@ -1,3 +1,6 @@
+// read in .env file
+require('dotenv').config();
+
 const express = require('express');
 const bodyParser = require("body-parser");
 
@@ -9,6 +12,7 @@ const app = express();
 require('./models/db.js');
 
 // routes setup
+const imageRoutes = require("./routes/image-routes.js");
 const userRoutes = require("./routes/user-routes.js");
 const artefactRoutes = require("./routes/artefact-routes.js");
 const collectionRoutes = require("./routes/collection-routes.js");
@@ -25,6 +29,7 @@ app.get('/', function(req,res) {
   res.send("Welcome to Curio!");
 });
 
+app.use('/api', imageRoutes);
 app.use('/api', userRoutes);
 app.use('/api', artefactRoutes);
 app.use('/api', collectionRoutes);

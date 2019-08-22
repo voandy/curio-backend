@@ -96,6 +96,10 @@ var register = function(req,res){
         subCollections: []
       });
 
+      if (req.body.profilePic) {
+        newUser.profilePic = req.body.profilePic;
+      }
+
       // Hash password before saving in database
       bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(newUser.password, salt, (err, hash) => {

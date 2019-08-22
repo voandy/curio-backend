@@ -66,6 +66,10 @@ var create = function (req,res) {
     comments:[]
   });
 
+  if (req.body.coverPhoto) {
+    newUser.coverPhoto = req.body.coverPhoto;
+  }
+
   // send it to database
   collection.save(function (err, newCollection) {
     if(!err){
