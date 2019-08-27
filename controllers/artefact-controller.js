@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// load User model
+// load Artefact model
 const Artefact = mongoose.model("Artefact");
 
 // get all artefacts

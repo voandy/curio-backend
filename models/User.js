@@ -16,10 +16,10 @@ const userSchema = new Schema(
     comments: [String],
 
     // list of collection ids to which this user has subscribed
-    subCollections: [String]
+    subbedCollections: [String]
   }
 );
 
-const User = mongoose.model('User',userSchema);
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;

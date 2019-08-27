@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// load User model
+// load Collection model
 const Collection = mongoose.model("Collection");
 
 // get all collections

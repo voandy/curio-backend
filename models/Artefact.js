@@ -34,6 +34,6 @@ const artefactSchema = new Schema(
   }
 );
 
-const Artefact = mongoose.model('Artefact',artefactSchema);
+const Artefact = mongoose.model('Artefact', artefactSchema);
 
 module.exports = Artefact;
