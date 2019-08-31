@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const collectionSchema = new Schema(
+const groupSchema = new Schema(
   {
     // admin id, foreign key
     adminId: { type: String, required: true },
@@ -14,17 +14,17 @@ const collectionSchema = new Schema(
     // cover photo URL
     coverPhoto: String,
 
-    // list of artefacts in this collection
+    // list of artefacts posted in this group
     artefacts: [{
       artefactId: String,
       dateAdded: { type: Date, default: Date.now }
     }],
 
-    // list of comments made on this collection
+    // list of comments made on this group
     comments: [String]
   }
 );
 
-const Collection = mongoose.model('Collection', collectionSchema);
+const Group = mongoose.model('Group', groupSchema);
 
-module.exports = Collection;
+module.exports = Group;
