@@ -87,10 +87,23 @@ var create = function (req,res) {
   });
 }
 
+// given a userId returns all artefacts posted by that user
+var getByUser = function(req,res) {
+  var userId = req.params.userId;
+  Artefact.find({userId:userId}, function(err, artefacts){
+    if(!err) {
+      res.send(artefacts);
+    } else{
+      res.status(404);
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
   deleteById,
   updateById,
-  create
+  create,
+  getByUser
 }
