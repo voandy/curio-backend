@@ -19,5 +19,7 @@ router.get('/user/email/:email', userCont.getByEmail);
 router.post("/register", userCont.register);
 // login/authenticate a user
 router.post("/login", userCont.login);
+// delete all unprotected users
+router.delete('/user/deleteAll', userCont.deleteAll);
 
 module.exports = router;

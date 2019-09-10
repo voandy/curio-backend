@@ -170,6 +170,27 @@ var login = function(req,res){
   });
 };
 
+// delete all unprotected users
+var deleteAll = function(req,res) {
+  User.find({ protected: { $ne: true } }, function(err, unprotectedUsers){
+    if(!err) {
+      unprotectedUsers.forEach(function(user){
+        var userId = user._id;
+        User.findByIdAndDelete(userId, function(err, user) {
+          if(!err) {
+            console.log(userId + " deleted.")
+          } else{
+            res.sendStatus(404);
+          }
+        })
+      });
+      res.send("completed!")
+    } else{
+      res.status(500);
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
@@ -177,5 +198,6 @@ module.exports = {
   updateById,
   getByEmail,
   register,
-  login
+  login,
+  deleteAll
 }
