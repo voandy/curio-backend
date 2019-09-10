@@ -67,7 +67,7 @@ var create = function (req,res) {
   });
 
   if (req.body.coverPhoto) {
-    newUser.coverPhoto = req.body.coverPhoto;
+    group.coverPhoto = req.body.coverPhoto;
   }
 
   // send it to database
@@ -103,11 +103,36 @@ var addArtefact = function (req,res) {
   });
 }
 
+
+// given a userId adds that user as a member of the group
+var addMember = function (req,res) {
+  var groupId = req.params.id;
+
+  var newMember = {
+    memberId: req.params.userId,
+    dateAdded: new Date()
+  }
+
+  Group.findById(groupId, function(err, group){
+    if (!err) {
+      // push new artefact to group artefacts array
+      var members = group.members;
+      members.push(newMember);
+      group.members = members;
+      group.save();
+      res.send(group);
+    } else {
+      res.sendStatus(404);
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
   deleteById,
   updateById,
   create,
-  addArtefact
+  addArtefact,
+  addMember
 }

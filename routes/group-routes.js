@@ -15,7 +15,9 @@ router.delete('/group/id/:id', groupCont.deleteById);
 router.put('/group/id/:id', groupCont.updateById);
 // create new group
 router.post('/group/adminId/:adminId', groupCont.create);
-// add artefact to group
+// add artefact to a group
 router.put('/group/id/:id/artefactId/:artefactId', groupCont.addArtefact);
+// add a user to a group
+router.put('/group/id/:id/userId/:userId', groupCont.addMember);
 
 module.exports = router;

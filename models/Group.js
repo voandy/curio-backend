@@ -20,6 +20,12 @@ const groupSchema = new Schema(
       dateAdded: { type: Date, default: Date.now }
     }],
 
+    // list of members of this group
+    members: [{
+      memberId: String,
+      dateAdded: { type: Date, default: Date.now }
+    }],
+
     // list of comments made on this group
     comments: [String]
   }

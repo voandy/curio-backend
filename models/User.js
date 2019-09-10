@@ -13,10 +13,7 @@ const userSchema = new Schema(
     profilePic: String,
 
     // list of comment ids made on this User
-    comments: [String],
-
-    // list of collection ids to which this user has subscribed
-    subbedCollections: [String]
+    comments: [String]
   }
 );
 
