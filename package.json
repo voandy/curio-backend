@@ -4,6 +4,7 @@
   "description": "Curio Backend",
   "main": "server.js",
   "scripts": {
+    "preinstall": "node gcpSetup.js",
     "start": "node server.js"
   },
   "author": "Christian, Andy, Shaun, Nick",
