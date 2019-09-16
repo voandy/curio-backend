@@ -23,5 +23,9 @@ router.put('/group/id/:id/remove/artefactId/:artefactId', groupCont.removeArtefa
 router.put('/group/id/:id/add/userId/:userId', groupCont.addMember);
 // remove a user from a group
 router.put('/group/id/:id/remove/userId/:userId', groupCont.removeMember);
+// get all the artefacts in a group
+router.get('/group/id/:id/artefacts', groupCont.getAllArtefacts);
+// get all the members of a group
+router.get('/group/id/:id/members', groupCont.getAllMembers);
 
 module.exports = router;

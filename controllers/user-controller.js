@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 // load User model
 const User = mongoose.model("User");
+// load Group model
+const Group = mongoose.model("Group");
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -200,6 +202,26 @@ var deleteAll = function(req,res) {
   });
 }
 
+var getAllGroups = function (req,res) {
+  var userId = req.params.id;
+  User.findById(userId, function(err, user){
+    if (!err) {
+      groupIds = user.groups;
+      
+      Group.find({_id:{$in:groupIds}}, function (err, groups) {
+        if (!err) {
+          res.send(groups);
+        } else {
+          res.status(404).send("No groups found.");
+        }
+      });
+
+    } else {
+      res.status(404).send("User not found.")
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
@@ -208,5 +230,6 @@ module.exports = {
   getByEmail,
   register,
   login,
-  deleteAll
+  deleteAll,
+  getAllGroups
 }

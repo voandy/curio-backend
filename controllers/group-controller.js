@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const Group = mongoose.model("Group");
 // load User model
 const User = mongoose.model("User");
+// load Artefact model
+const Artefact = mongoose.model("Artefact");
 
 // get all groups
 var getAll = function(req,res){
@@ -293,6 +295,49 @@ var removeMember = function (req,res) {
   removeFromBoth();
 }
 
+// give a groupId returns an object containing all the artefacts in that group
+var getAllArtefacts = function (req,res) {
+  var groupId = req.params.id;
+  Group.findById(groupId, function(err, group){
+    if (!err) {
+      artefacts = group.artefacts;
+      var artefactIds = artefacts.map(x => x.artefactId);
+      
+      Artefact.find({_id:{$in:artefactIds}}, function (err, artefacts) {
+        if (!err) {
+          res.send(artefacts);
+        } else {
+          res.status(404).send("No artefacts found.");
+        }
+      });
+
+    } else {
+      res.status(404).send("Group not found.")
+    }
+  });
+}
+
+var getAllMembers = function (req,res) {
+  var groupId = req.params.id;
+  Group.findById(groupId, function(err, group){
+    if (!err) {
+      members = group.members;
+      var memberIds = members.map(x => x.memberId);
+      
+      User.find({_id:{$in:memberIds}}, function (err, members) {
+        if (!err) {
+          res.send(members);
+        } else {
+          res.status(404).send("No members found.");
+        }
+      });
+
+    } else {
+      res.status(404).send("Group not found.")
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
@@ -302,5 +347,7 @@ module.exports = {
   addArtefact,
   removeArtefact,
   addMember,
-  removeMember
+  removeMember,
+  getAllArtefacts,
+  getAllMembers
 }

@@ -21,5 +21,7 @@ router.post("/register", userCont.register);
 router.post("/login", userCont.login);
 // delete all unprotected users
 router.delete('/user/deleteAll', userCont.deleteAll);
+// get all the groups this user in a member of
+router.get('/user/id/:id/groups', userCont.getAllGroups);
 
 module.exports = router;
