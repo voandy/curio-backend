@@ -99,11 +99,53 @@ var getByUser = function(req,res) {
   });
 }
 
+var like = function(req,res) {
+  var artefactId = req.params.id;
+  var userId = req.params.userId;
+  Artefact.findById(artefactId, function(err, artefact){
+    if (!err) {
+      likes = artefact.likes;
+      likes.push(userId);
+      artefact.likes = likes;
+      artefact.save();
+      res.send(artefact);
+    } else {
+      res.status(404).send("Group not found.");
+    }
+  });
+}
+
+var unlike = function(req,res) {
+  var artefactId = req.params.id;
+  var userId = req.params.userId;
+  Artefact.findById(artefactId, function(err, artefact){
+    if (!err) {
+      likes = artefact.likes;
+
+      var index = likes.indexOf(userId);
+      if (index >= 0) {
+        likes.splice(index, 1);
+      } else {
+        res.status(404).send("User not found.");
+      }
+      
+
+      artefact.likes = likes;
+      artefact.save();
+      res.send(artefact);
+    } else {
+      res.status(404).send("Group not found.");
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
   deleteById,
   updateById,
   create,
-  getByUser
+  getByUser,
+  like,
+  unlike
 }

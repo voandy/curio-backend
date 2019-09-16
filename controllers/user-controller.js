@@ -102,7 +102,8 @@ var register = function(req,res){
     password: req.body.password,
 
     dateJoined: new Date(),
-    comments: []
+    comments: [],
+    groups: [],
   });
 
   if (req.body.profilePic) {

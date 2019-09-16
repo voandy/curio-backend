@@ -15,9 +15,13 @@ router.delete('/group/id/:id', groupCont.deleteById);
 router.put('/group/id/:id', groupCont.updateById);
 // create new group
 router.post('/group/adminId/:adminId', groupCont.create);
-// add artefact to a group
-router.put('/group/id/:id/artefactId/:artefactId', groupCont.addArtefact);
+// add an artefact to a group
+router.put('/group/id/:id/add/artefactId/:artefactId', groupCont.addArtefact);
+// remove an artefact from a group
+router.put('/group/id/:id/remove/artefactId/:artefactId', groupCont.removeArtefact);
 // add a user to a group
-router.put('/group/id/:id/userId/:userId', groupCont.addMember);
+router.put('/group/id/:id/add/userId/:userId', groupCont.addMember);
+// remove a user from a group
+router.put('/group/id/:id/remove/userId/:userId', groupCont.removeMember);
 
 module.exports = router;

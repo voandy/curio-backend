@@ -17,5 +17,9 @@ router.put('/artefact/id/:id', artefactCont.updateById);
 router.post('/artefact', artefactCont.create);
 // get artefacts by user id
 router.get('/artefact/userId/:userId', artefactCont.getByUser);
+// like an artefact
+router.post('/artefact/id/:id/userId/:userId', artefactCont.like);
+// unlike an artefact
+router.post('/artefact/id/:id/userId/:userId', artefactCont.unlike);
 
 module.exports = router;

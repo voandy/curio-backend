@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 // load Group model
 const Group = mongoose.model("Group");
+// load User model
+const User = mongoose.model("User");
 
 // get all groups
 var getAll = function(req,res){
@@ -63,7 +65,8 @@ var create = function (req,res) {
     dateCreated: new Date(),
 
     artefacts:[],
-    comments:[]
+    comments:[],
+    members:[]
   });
 
   if (req.body.coverPhoto) {
@@ -83,22 +86,55 @@ var create = function (req,res) {
 // given an artefactId and groupId adds the artefact to the group
 var addArtefact = function (req,res) {
   var groupId = req.params.id;
+  var artefactId = req.params.artefactId;
 
   var newArtefact = {
-    artefactId: req.params.artefactId,
+    artefactId: artefactId,
     dateAdded: new Date()
   }
 
   Group.findById(groupId, function(err, group){
     if (!err) {
-      // push new artefact to group artefacts array
+      // push new artefact to group.artefacts array
       var artefacts = group.artefacts;
-      artefacts.push(newArtefact);
-      group.artefacts = artefacts;
-      group.save();
-      res.send(group);
+
+      var index = artefacts.findIndex(x => x.artefactId == artefactId);
+
+      if (index < 0) {
+        artefacts.push(newArtefact);
+        group.artefacts = artefacts;
+        group.save();
+        res.send(group);
+      } else {
+        res.status(500).send("Artefact is already listed in this group.")
+      }
     } else {
       res.sendStatus(404);
+    }
+  });
+}
+
+// given an artefactId and groupId removes the artefact from the group
+var removeArtefact = function (req,res) {
+  var groupId = req.params.id;
+  var artefactId = req.params.artefactId;
+
+  Group.findById(groupId, function(err, group){
+    if (!err) {
+      var artefacts = group.artefacts;
+      var index = artefacts.findIndex(x => x.artefactId == artefactId);
+
+      if (index >= 0) {
+        artefacts.splice(index, 1);
+        group.artefacts = artefacts;
+        group.save();
+        res.send(group);
+      } else {
+        res.status(404).send("Artefact not found in group.artefacts array.")
+      }
+
+    } else {
+      res.status(404).send("Group not found.")
     }
   });
 }
@@ -107,24 +143,154 @@ var addArtefact = function (req,res) {
 // given a userId adds that user as a member of the group
 var addMember = function (req,res) {
   var groupId = req.params.id;
+  var memberId = req.params.userId;
 
-  var newMember = {
-    memberId: req.params.userId,
-    dateAdded: new Date()
+  var status = "";
+  var updatedGroup;
+
+  function addToGroup() {
+    return new Promise(resolve => {
+      var newMember = {
+        memberId: memberId,
+        dateAdded: new Date()
+      }
+    
+      Group.findById(groupId, function(err, group){
+        if (!err) {
+          // add new member to group.members array
+          var members = group.members;
+          members.push(newMember);
+          group.members = members;
+          group.save();
+          updatedGroup = group;
+          resolve();
+        } else {
+          status = "Group not found.";
+          resolve();
+        }
+      });
+    });
   }
 
+  function addToUser() {
+    return new Promise(resolve => {
+      User.findById(memberId, function(err, member){
+        if (!err) {
+          // add groupId to member's groups
+          var groups = member.groups;
+          groups.push(groupId);
+          member.groups = groups;
+          member.save();
+          resolve();
+        } else {
+          status = "User not found.";
+          resolve();
+        }
+      });
+    });
+  }
+
+  async function addToBoth() {
+    await Promise.all([addToGroup(), addToUser()]);
+  
+    if (status) {
+      res.status(404).send(status);
+    } else {
+      res.send(updatedGroup);
+    }
+  }
+
+  // check if user is already a member of the group before adding.
   Group.findById(groupId, function(err, group){
     if (!err) {
-      // push new artefact to group artefacts array
       var members = group.members;
-      members.push(newMember);
-      group.members = members;
-      group.save();
-      res.send(group);
+      var index = members.findIndex(x => x.memberId == memberId);
+
+      if (index < 0) {
+        addToBoth();
+      } else {
+        res.status(500).send("User aleady a member of this group.");
+      }
     } else {
-      res.sendStatus(404);
+      status = "Group not found.";
+      resolve();
     }
   });
+  
+}
+
+// given a userId removes that user from the group
+var removeMember = function (req,res) {
+  var groupId = req.params.id;
+  var memberId = req.params.userId;
+
+  var status = "";
+  var updatedGroup;
+
+  function removeFromGroup() {
+    return new Promise(resolve => {
+      Group.findById(groupId, function(err, group){
+        if (!err) {
+          // remove member from group.members
+          var members = group.members;
+          var index = members.findIndex(x => x.memberId == memberId);
+    
+          if (index >= 0) {
+            members.splice(index, 1);
+            group.members = members;
+            group.save();
+            updatedGroup = group;
+            resolve();
+          } else {
+            status = "Member not found in group.members array.";
+            resolve();
+          } 
+    
+        } else {
+          status = "Group not found.";
+          resolve();
+        }
+      });
+    });
+  }
+
+  function removeFromUser() {
+    return new Promise(resolve => {
+      User.findById(memberId, function(err, member){
+        if (!err) {
+          // add groupId to member's groups
+          var groups = member.groups;
+          var index = groups.indexOf(groupId);
+          
+          if (index >= 0) {
+            groups.splice(index, 1);
+            member.groups = groups;
+            member.save();
+            resolve();
+          } else {
+            status = "Group not found in user.groups array.";
+            resolve();
+          }
+    
+        } else {
+          status = "User not found.";
+          resolve();
+        }
+      });
+    });
+  }
+
+  async function removeFromBoth() {
+    await Promise.all([removeFromGroup(), removeFromUser()]);
+  
+    if (status) {
+      res.status(404).send(status);
+    } else {
+      res.send(updatedGroup);
+    }
+  }
+
+  removeFromBoth();
 }
 
 module.exports = {
@@ -134,5 +300,7 @@ module.exports = {
   updateById,
   create,
   addArtefact,
-  addMember
+  removeArtefact,
+  addMember,
+  removeMember
 }
