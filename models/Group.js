@@ -26,6 +26,9 @@ const groupSchema = new Schema(
       dateAdded: { type: Date, default: Date.now }
     }],
 
+    // privacy: 0 = public, 1 = private
+    privacy: { type: Number, default: Date.now },
+
     protected: { type: Boolean, default: false }
   }
 );

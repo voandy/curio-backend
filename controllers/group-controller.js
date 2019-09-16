@@ -76,6 +76,13 @@ var create = function (req,res) {
     group.coverPhoto = req.body.coverPhoto;
   }
 
+  // privacy setting for artefact, default = public
+  if (req.body.privacy) {
+    group.privacy = req.body.privacy;
+  } else {
+    group.privacy = 0;
+  }
+
   // send it to database
   group.save(function (err, newGroup) {
     if(!err){
@@ -345,6 +352,27 @@ var getAllMembers = function (req,res) {
   });
 }
 
+// delete all unprotected groups
+var deleteAll = function(req, res) {
+  Group.find({ protected: { $ne: true } }, function(err, unprotectedGroups){
+    if(!err) {
+      unprotectedGroups.forEach(function(group){
+        var groupId = group._id;
+        Group.findByIdAndDelete(groupId, function(err) {
+          if(!err) {
+            console.log(groupId + " deleted.")
+          } else{
+            res.sendStatus(404);
+          }
+        })
+      });
+      res.send("completed!")
+    } else{
+      res.status(500);
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
@@ -356,5 +384,6 @@ module.exports = {
   addMember,
   removeMember,
   getAllArtefacts,
-  getAllMembers
+  getAllMembers,
+  deleteAll
 }

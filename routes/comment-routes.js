@@ -15,5 +15,7 @@ router.delete('/comment/id/:id', commentCont.deleteById);
 router.put('/comment/id/:id', commentCont.updateById);
 // create new comment
 router.post("/comment", commentCont.create);
+// delete all unprotected comments
+router.delete('/user/deleteAll', commentCont.deleteAll);
 
 module.exports = router;

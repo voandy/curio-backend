@@ -27,5 +27,7 @@ router.put('/group/id/:id/remove/userId/:userId', groupCont.removeMember);
 router.get('/group/id/:id/artefacts', groupCont.getAllArtefacts);
 // get all the members of a group
 router.get('/group/id/:id/members', groupCont.getAllMembers);
+// delete all unprotected groups
+router.delete('/group/deleteAll', groupCont.deleteAll);
 
 module.exports = router;

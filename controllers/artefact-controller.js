@@ -78,11 +78,22 @@ var create = function (req,res) {
   });
 
   // add and image if one is specified
-  // TODO: implement ability to add multiple images
   if (req.body.imageURL) {
-    artefact.imageURLs = [req.body.imageURL];
+    var newImage = {
+      URL: req.body.imageURL,
+      dateAdded: new Date(),
+      order: 0
+    }
+    artefact.imageURLs = [newImage];
   } else {
     artefact.imageURLs = [];
+  }
+
+  // privacy setting for artefact, default = public
+  if (req.body.privacy) {
+    artefact.privacy = req.body.privacy;
+  } else {
+    artefact.privacy = 0;
   }
 
   // send it to database
@@ -174,6 +185,27 @@ var getLikedUsers = function(req,res) {
   });
 }
 
+// delete all unprotected artefacts
+var deleteAll = function(req, res) {
+  Artefact.find({ protected: { $ne: true } }, function(err, unprotectedArtefacts){
+    if(!err) {
+      unprotectedArtefacts.forEach(function(artefact){
+        var artefactId = artefact._id;
+        Artefact.findByIdAndDelete(artefactId, function(err) {
+          if(!err) {
+            console.log(artefactId + " deleted.")
+          } else{
+            res.sendStatus(500);
+          }
+        })
+      });
+      res.send("completed!")
+    } else{
+      res.status(500);
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
@@ -183,5 +215,6 @@ module.exports = {
   getByUser,
   like,
   unlike,
-  getLikedUsers
+  getLikedUsers,
+  deleteAll
 }

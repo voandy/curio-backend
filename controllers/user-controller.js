@@ -200,7 +200,7 @@ var deleteAll = function(req,res) {
     if(!err) {
       unprotectedUsers.forEach(function(user){
         var userId = user._id;
-        User.findByIdAndDelete(userId, function(err, user) {
+        User.findByIdAndDelete(userId, function(err) {
           if(!err) {
             console.log(userId + " deleted.")
           } else{

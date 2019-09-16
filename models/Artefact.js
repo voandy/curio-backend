@@ -24,10 +24,17 @@ const artefactSchema = new Schema(
     obtLat: Number,
 
     // url of the images
-    imageURLs: [String],
+    imageURLs: [{
+      URL: String,
+      dateAdded: { type: Date, default: Date.now },
+      order: Number
+    }],
 
     // list of user ids who've liked
     likes: [String],
+
+    // privacy: 0 = public, 1 = private
+    privacy: { type: Number, default: Date.now },
 
     protected: { type: Boolean, default: false }
   }

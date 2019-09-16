@@ -21,5 +21,7 @@ router.get('/artefact/userId/:userId', artefactCont.getByUser);
 router.post('/artefact/id/:id/userId/:userId', artefactCont.like);
 // unlike an artefact
 router.post('/artefact/id/:id/userId/:userId', artefactCont.unlike);
+// delete all unprotected artefacts
+router.delete('/artefact/deleteAll', artefactCont.deleteAll);
 
 module.exports = router;

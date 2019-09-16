@@ -69,10 +69,32 @@ var create = function (req,res) {
   });
 }
 
+// delete all unprotected comments
+var deleteAll = function(req,res) {
+  Comment.find({ protected: { $ne: true } }, function(err, unprotectedComments){
+    if(!err) {
+      unprotectedComments.forEach(function(comment){
+        var commentId = comment._id;
+        Comment.findByIdAndDelete(commentId, function(err) {
+          if(!err) {
+            console.log(commentId + " deleted.")
+          } else{
+            res.sendStatus(404);
+          }
+        })
+      });
+      res.send("completed!")
+    } else{
+      res.status(500);
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
   deleteById,
   updateById,
-  create
+  create,
+  deleteAll
 }

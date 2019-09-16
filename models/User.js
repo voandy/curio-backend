@@ -18,7 +18,7 @@ const userSchema = new Schema(
     groups: [{
       groupId: String,
       dateJoined: { type: Date, default: Date.now },
-      pinned: false
+      pinned: Boolean
     }],
 
     protected: { type: Boolean, default: false }
