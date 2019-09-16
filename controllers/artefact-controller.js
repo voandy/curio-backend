@@ -72,10 +72,17 @@ var create = function (req,res) {
     obtLng: req.body.obtLng,
     obtLat: req.body.obtLat,
 
-    imageURLs: [],
     likes: [],
     comments: []
   });
+
+  // add and image if one is specified
+  // TODO: implement ability to add multiple images
+  if (req.body.imageURL) {
+    artefact.imageURLs = [req.body.imageURL];
+  } else {
+    artefact.imageURLs = [];
+  }
 
   // send it to database
   artefact.save(function (err, newArtefact) {
