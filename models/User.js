@@ -14,11 +14,14 @@ const userSchema = new Schema(
 
     profilePic: String,
 
-    // list of comment ids made on this User
-    comments: [String],
-
     // list of groups of which this user is a member
-    groups: [String]
+    groups: [{
+      groupId: String,
+      dateJoined: { type: Date, default: Date.now },
+      pinned: false
+    }],
+
+    protected: { type: Boolean, default: false }
   }
 );
 

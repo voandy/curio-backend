@@ -29,7 +29,7 @@ var getAll = function(req,res){
 var getById = function(req,res){
   var userId = req.params.id;
   User.findById(userId, function(err, user){
-    if (!err) {
+    if (!err && user) {
       res.send(user);
     } else {
       res.sendStatus(404);
@@ -73,6 +73,18 @@ var getByEmail = function(req,res){
   });
 };
 
+// get user by username
+var getByUsername = function(req,res){
+  var username = req.params.username;
+  User.find({username: username}, function(err, user) {
+    if(!err) {
+      res.send(user);
+    } else {
+      res.sendStatus(404);
+    }
+  });
+};
+
 // @route POST api/user/register
 // @desc Register user
 // @access Public
@@ -104,8 +116,9 @@ var register = function(req,res){
     password: req.body.password,
 
     dateJoined: new Date(),
-    comments: [],
     groups: [],
+
+    protected: false
   });
 
   if (req.body.profilePic) {
@@ -225,6 +238,7 @@ var getAllGroups = function (req,res) {
 module.exports = {
   getAll,
   getById,
+  getByUsername,
   deleteById,
   updateById,
   getByEmail,

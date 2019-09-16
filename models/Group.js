@@ -26,8 +26,7 @@ const groupSchema = new Schema(
       dateAdded: { type: Date, default: Date.now }
     }],
 
-    // list of comments made on this group
-    comments: [String]
+    protected: { type: Boolean, default: false }
   }
 );
 

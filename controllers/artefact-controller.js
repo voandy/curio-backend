@@ -18,7 +18,7 @@ var getAll = function(req,res){
 var getById = function(req,res){
   var artefactId = req.params.id;
   Artefact.findById(artefactId, function(err, artefact){
-    if (!err) {
+    if (!err && artefact) {
       res.send(artefact);
     } else {
       res.sendStatus(404);
@@ -73,7 +73,8 @@ var create = function (req,res) {
     obtLat: req.body.obtLat,
 
     likes: [],
-    comments: []
+
+    protected: false
   });
 
   // add and image if one is specified
@@ -112,10 +113,17 @@ var like = function(req,res) {
   Artefact.findById(artefactId, function(err, artefact){
     if (!err) {
       likes = artefact.likes;
-      likes.push(userId);
-      artefact.likes = likes;
-      artefact.save();
-      res.send(artefact);
+      var index = likes.indexOf(userId);
+
+      if (index < 0) {
+        likes = artefact.likes;
+        likes.push(userId);
+        artefact.likes = likes;
+        artefact.save();
+        res.send(artefact);
+      } else {
+        res.status(400).send("User already liked this artefact");
+      }
     } else {
       res.status(404).send("Group not found.");
     }
@@ -135,13 +143,33 @@ var unlike = function(req,res) {
       } else {
         res.status(404).send("User not found.");
       }
-      
 
       artefact.likes = likes;
       artefact.save();
       res.send(artefact);
     } else {
       res.status(404).send("Group not found.");
+    }
+  });
+}
+
+// returns all users who like this artefact
+var getLikedUsers = function(req,res) {
+  var artefactId = req.params.id;
+  Artefact.findById(artefactId, function(err, artefact){
+    if (!err) {
+      likes = artefact.likes;
+      
+      User.find({_id:{$in:likes}}, function (err, users) {
+        if (!err) {
+          res.send(users);
+        } else {
+          res.status(404).send("No users found.");
+        }
+      });
+
+    } else {
+      res.status(404).send("Artefact not found.")
     }
   });
 }
@@ -154,5 +182,6 @@ module.exports = {
   create,
   getByUser,
   like,
-  unlike
+  unlike,
+  getLikedUsers
 }

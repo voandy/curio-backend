@@ -18,7 +18,7 @@ var getAll = function(req,res){
 var getById = function(req,res){
   var commentId = req.params.id;
   Comment.findById(commentId, function(err, comment){
-    if (!err) {
+    if (!err && comment) {
       res.send(comment);
     } else {
       res.sendStatus(404);

@@ -22,7 +22,7 @@ var getAll = function(req,res){
 var getById = function(req,res){
   var groupId = req.params.id;
   Group.findById(groupId, function(err, group){
-    if (!err) {
+    if (!err && group) {
       res.send(group);
     } else {
       res.sendStatus(404);
@@ -67,8 +67,9 @@ var create = function (req,res) {
     dateCreated: new Date(),
 
     artefacts:[],
-    comments:[],
-    members:[]
+    members:[],
+
+    protected: false
   });
 
   if (req.body.coverPhoto) {
@@ -96,7 +97,7 @@ var addArtefact = function (req,res) {
   }
 
   Group.findById(groupId, function(err, group){
-    if (!err) {
+    if (!err && group) {
       // push new artefact to group.artefacts array
       var artefacts = group.artefacts;
 
@@ -122,7 +123,7 @@ var removeArtefact = function (req,res) {
   var artefactId = req.params.artefactId;
 
   Group.findById(groupId, function(err, group){
-    if (!err) {
+    if (!err && group) {
       var artefacts = group.artefacts;
       var index = artefacts.findIndex(x => x.artefactId == artefactId);
 
@@ -158,7 +159,7 @@ var addMember = function (req,res) {
       }
     
       Group.findById(groupId, function(err, group){
-        if (!err) {
+        if (!err && group) {
           // add new member to group.members array
           var members = group.members;
           members.push(newMember);
@@ -176,11 +177,17 @@ var addMember = function (req,res) {
 
   function addToUser() {
     return new Promise(resolve => {
+      var newGroup = {
+        groupId: groupId,
+        dateJoined: new Date(),
+        pinned: false
+      }
+
       User.findById(memberId, function(err, member){
-        if (!err) {
+        if (!err && member) {
           // add groupId to member's groups
           var groups = member.groups;
-          groups.push(groupId);
+          groups.push(newGroup);
           member.groups = groups;
           member.save();
           resolve();
@@ -204,7 +211,7 @@ var addMember = function (req,res) {
 
   // check if user is already a member of the group before adding.
   Group.findById(groupId, function(err, group){
-    if (!err) {
+    if (!err && group) {
       var members = group.members;
       var index = members.findIndex(x => x.memberId == memberId);
 
@@ -232,7 +239,7 @@ var removeMember = function (req,res) {
   function removeFromGroup() {
     return new Promise(resolve => {
       Group.findById(groupId, function(err, group){
-        if (!err) {
+        if (!err && group) {
           // remove member from group.members
           var members = group.members;
           var index = members.findIndex(x => x.memberId == memberId);
@@ -259,10 +266,10 @@ var removeMember = function (req,res) {
   function removeFromUser() {
     return new Promise(resolve => {
       User.findById(memberId, function(err, member){
-        if (!err) {
+        if (!err && member) {
           // add groupId to member's groups
           var groups = member.groups;
-          var index = groups.indexOf(groupId);
+          var index = groups.findIndex(x => x.groupId == groupId);
           
           if (index >= 0) {
             groups.splice(index, 1);
@@ -299,7 +306,7 @@ var removeMember = function (req,res) {
 var getAllArtefacts = function (req,res) {
   var groupId = req.params.id;
   Group.findById(groupId, function(err, group){
-    if (!err) {
+    if (!err && group) {
       artefacts = group.artefacts;
       var artefactIds = artefacts.map(x => x.artefactId);
       
@@ -320,7 +327,7 @@ var getAllArtefacts = function (req,res) {
 var getAllMembers = function (req,res) {
   var groupId = req.params.id;
   Group.findById(groupId, function(err, group){
-    if (!err) {
+    if (!err && group) {
       members = group.members;
       var memberIds = members.map(x => x.memberId);
       

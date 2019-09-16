@@ -29,8 +29,7 @@ const artefactSchema = new Schema(
     // list of user ids who've liked
     likes: [String],
 
-    // list of comments made on this artefact
-    comments: [String]
+    protected: { type: Boolean, default: false }
   }
 );
 

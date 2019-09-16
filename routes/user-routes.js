@@ -15,6 +15,8 @@ router.delete('/user/id/:id', userCont.deleteById);
 router.put('/user/id/:id', userCont.updateById);
 // get user by email
 router.get('/user/email/:email', userCont.getByEmail);
+// get user by username
+router.get('/user/username/:username', userCont.getByUsername);
 // register new user
 router.post("/register", userCont.register);
 // login/authenticate a user
