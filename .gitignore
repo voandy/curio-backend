@@ -5,6 +5,8 @@
 # GCS Keyfile
 reuser-1554380736454-2debe32d3c8a.json
 services/gcs/gcs-keyfile.json
+gcs-keyfile.json
+.env
 
 # Mac Rubbish
 .DS_Store
