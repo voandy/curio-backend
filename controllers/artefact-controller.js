@@ -84,9 +84,9 @@ var create = function (req,res) {
       dateAdded: new Date(),
       order: 0
     }
-    artefact.imageURLs = [newImage];
+    artefact.images = [newImage];
   } else {
-    artefact.imageURLs = [];
+    artefact.images = [];
   }
 
   // privacy setting for artefact, default = public
