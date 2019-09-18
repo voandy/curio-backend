@@ -219,7 +219,8 @@ var getAllGroups = function (req,res) {
   var userId = req.params.id;
   User.findById(userId, function(err, user){
     if (!err) {
-      groupIds = user.groups;
+      var groups = user.groups;
+      var groupIds = groups.map(x => x.groupId);
       
       Group.find({_id:{$in:groupIds}}, function (err, groups) {
         if (!err) {

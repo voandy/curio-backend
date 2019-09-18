@@ -24,7 +24,7 @@ const artefactSchema = new Schema(
     obtLat: Number,
 
     // url of the images
-    imageURLs: [{
+    images: [{
       URL: String,
       dateAdded: { type: Date, default: Date.now },
       order: Number
