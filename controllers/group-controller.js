@@ -334,7 +334,7 @@ var getAllArtefacts = function (req,res) {
 
   Group.findById(groupId).lean().exec(function(err, group) {
     if (!err && group) {
-      groupArtefacts = group.artefacts;
+      var groupArtefacts = group.artefacts;
       getAll(groupArtefacts).then(function() {
         res.send(groupArtefacts);
       });
@@ -368,7 +368,7 @@ var getAllMembers = function (req,res) {
 
   Group.findById(groupId).lean().exec(function(err, group){
     if (!err && group) {
-      groupMembers = group.members;
+      var groupMembers = group.members;
       getAll(groupMembers).then(function() {
         res.send(groupMembers);
       });

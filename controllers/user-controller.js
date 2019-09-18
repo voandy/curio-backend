@@ -144,18 +144,18 @@ var register = function(req,res){
 var login = function(req,res){
 
   // Form validation
-  const { errors, isValid } = validateLoginInput(req.body);
+  // const { errors, isValid } = validateLoginInput(req.body);
 
   // Check validation
-  if (!isValid) {
-    return res.status(400).json(errors);
-  }
+  // if (!isValid) {
+  //   return res.status(400).json(errors);
+  // }
 
-  const email = req.body.email;
+  const useroremail = req.body.email;
   const password = req.body.password;
 
   // Find user by email
-  User.findOne({ email }).then(user => {
+  User.findOne({ $or: [{email: useroremail},{username: useroremail}] }).then(user => {
 
     // Check if user exists
     if (!user) {
