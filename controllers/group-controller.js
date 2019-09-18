@@ -311,66 +311,55 @@ var removeMember = function (req,res) {
 // give a groupId returns an object containing all the artefacts in that group
 var getAllArtefacts = function (req,res) {
   var groupId = req.params.id;
-
-  function getArtefact(groupArtefact){
-    var id = mongoose.Types.ObjectId(groupArtefact.artefactId);
-    return new Promise(resolve => {
-      Artefact.find(id, function (err, artefact) {
+  Group.findById(groupId).lean().exec(function(err, group){
+    if (!err && group) {
+      artefactDetails = group.artefacts;
+      var artefactIds = artefactDetails.map(x => x.artefactId);
+      
+      Artefact.find({_id:{$in:artefactIds}}, function (err, artefacts) {
         if (!err) {
-          groupArtefact.artefact = artefact;
-          resolve();
+          artefactDetails.forEach(function(artefactDetail) {
+            artefacts.forEach(function(artefact) {
+              if(artefactDetail.artefactId == artefact._id) {
+                artefactDetail.details = artefact;
+              }
+            });
+          });
+          res.send(artefactDetails);
         } else {
-          resolve("Artefact not found.");
+          res.status(404).send("No artefacts found.");
         }
       });
-    });
-  }
 
-  async function getAll(groupArtefacts){
-    const promises = groupArtefacts.map(getArtefact);
-    await Promise.all(promises);
-  }
-
-  Group.findById(groupId).lean().exec(function(err, group) {
-    if (!err && group) {
-      var groupArtefacts = group.artefacts;
-      getAll(groupArtefacts).then(function() {
-        res.send(groupArtefacts);
-      });
     } else {
       res.status(404).send("Group not found.")
     }
   });
 }
 
+// get all the members in a group
 var getAllMembers = function (req,res) {
   var groupId = req.params.id;
-
-  function getMember(groupMember){
-    var id = mongoose.Types.ObjectId(groupMember.memberId);
-    return new Promise(resolve => {
-      User.find(id, function (err, member) {
-        if (!err) {
-          groupMember.member = member;
-          resolve();
-        } else {
-          resolve("Member not found.");
-        }
-      });
-    });
-  }
-
-  async function getAll(groupMembers){
-    const promises = groupMembers.map(getMember);
-    await Promise.all(promises);
-  }
-
   Group.findById(groupId).lean().exec(function(err, group){
     if (!err && group) {
-      var groupMembers = group.members;
-      getAll(groupMembers).then(function() {
-        res.send(groupMembers);
+      memberDetails = group.members;
+      var memberIds = memberDetails.map(x => x.memberId);
+      
+      User.find({_id:{$in:memberIds}}, function (err, members) {
+        if (!err) {
+          memberDetails.forEach(function(memberDetail) {
+            members.forEach(function(member) {
+              if (memberDetail.memberId == member._id) {
+                memberDetail.details = member;
+              }
+            });
+          });
+          res.send(memberDetails);
+        } else {
+          res.status(404).send("No members found.");
+        }
       });
+
     } else {
       res.status(404).send("Group not found.")
     }

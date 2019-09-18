@@ -144,12 +144,12 @@ var register = function(req,res){
 var login = function(req,res){
 
   // Form validation
-  // const { errors, isValid } = validateLoginInput(req.body);
+  const { errors, isValid } = validateLoginInput(req.body);
 
   // Check validation
-  // if (!isValid) {
-  //   return res.status(400).json(errors);
-  // }
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
 
   const useroremail = req.body.email;
   const password = req.body.password;
@@ -217,31 +217,24 @@ var deleteAll = function(req,res) {
 
 var getAllGroups = function (req,res) {
   var userId = req.params.id;
-
-  function getGroup(oneGroup){
-    var id = mongoose.Types.ObjectId(oneGroup.groupId);
-    return new Promise(resolve => {
-      Group.find(id, function (err, group) {
-        if (!err) {
-          oneGroup.group = group;
-          resolve();
-        } else {
-          resolve("Group not found.");
-        }
-      });
-    });
-  }
-
-  async function getAll(userGroups){
-    const promises = userGroups.map(getGroup);
-    await Promise.all(promises);
-  }
-
-  User.findById(userId).lean().exec( function(err, user){
+  User.findById(userId).lean().exec(function(err, user){
     if (!err) {
-      var userGroups = user.groups;
-      getAll(userGroups).then(function() {
-        res.send(userGroups);
+      var groupDetails = user.groups;
+      var groupIds = groupDetails.map(x => x.groupId);
+      
+      Group.find({_id:{$in:groupIds}}, function (err, groups) {
+        if (!err) {
+          groupDetails.forEach(function(groupDetail) {
+            groups.forEach(function(group) {
+              if (groupDetail.groupId == group._id) {
+                groupDetail.details = group;
+              }
+            });
+          });
+          res.send(groupDetails);
+        } else {
+          res.status(404).send("No groups found.");
+        }
       });
 
     } else {
