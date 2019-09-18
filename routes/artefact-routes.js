@@ -23,5 +23,9 @@ router.post('/artefact/id/:id/userId/:userId', artefactCont.like);
 router.post('/artefact/id/:id/userId/:userId', artefactCont.unlike);
 // delete all unprotected artefacts
 router.delete('/artefact/deleteAll', artefactCont.deleteAll);
+// add an image to the artefact
+router.post('/artefact/id/:id/image', artefactCont.addImage);
+// remove and image from the artefact
+router.delete('/artefact/id/:id/image', artefactCont.removeImage);
 
 module.exports = router;

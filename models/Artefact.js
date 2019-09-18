@@ -26,8 +26,7 @@ const artefactSchema = new Schema(
     // url of the images
     images: [{
       URL: String,
-      dateAdded: { type: Date, default: Date.now },
-      order: Number
+      dateAdded: { type: Date, default: Date.now }
     }],
 
     // list of user ids who've liked

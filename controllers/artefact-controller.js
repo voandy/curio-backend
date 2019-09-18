@@ -82,7 +82,6 @@ var create = function (req,res) {
     var newImage = {
       URL: req.body.imageURL,
       dateAdded: new Date(),
-      order: 0
     }
     artefact.images = [newImage];
   } else {
@@ -206,6 +205,46 @@ var deleteAll = function(req, res) {
   });
 }
 
+// add an image to an artefact
+var addImage = function(req, res) {
+  var artefactId = req.params.id;
+
+  var newImage = {
+    URL: req.body.imageURL,
+    dateAdded: new Date(),
+  }
+
+  Artefact.findById(artefactId, function(err, artefact){
+    if (!err && artefact) {
+      images = artefact.images;
+      images.push(newImage);
+      artefact.images = images;
+      artefact.save();
+      res.send(artefact);
+    } else {
+      res.sendStatus(404);
+    }
+  });
+}
+
+// remove an image to an artefact
+var removeImage = function(req, res) {
+  var artefactId = req.params.id;
+  var imageIndex = req.body.imageIndex;
+
+  Artefact.findById(artefactId, function(err, artefact){
+    if (!err && artefact) {
+      images = artefact.images;
+      images.splice(imageIndex, 1);
+      artefact.images = images;
+      artefact.save();
+      res.send(artefact);
+    } else {
+      res.sendStatus(404);
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
@@ -216,5 +255,7 @@ module.exports = {
   like,
   unlike,
   getLikedUsers,
-  deleteAll
+  deleteAll,
+  addImage,
+  removeImage
 }
