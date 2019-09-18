@@ -312,19 +312,32 @@ var removeMember = function (req,res) {
 // give a groupId returns an object containing all the artefacts in that group
 var getAllArtefacts = function (req,res) {
   var groupId = req.params.id;
-  Group.findById(groupId, function(err, group){
-    if (!err && group) {
-      artefacts = group.artefacts;
-      var artefactIds = artefacts.map(x => x.artefactId);
-      
-      Artefact.find({_id:{$in:artefactIds}}, function (err, artefacts) {
+
+  function getArtefact(groupArtefact){
+    var id = mongoose.Types.ObjectId(groupArtefact.artefactId);
+    return new Promise(resolve => {
+      Artefact.find(id, function (err, artefact) {
         if (!err) {
-          res.send(artefacts);
+          groupArtefact.artefact = artefact;
+          resolve();
         } else {
-          res.status(404).send("No artefacts found.");
+          resolve("Artefact not found.");
         }
       });
+    });
+  }
 
+  async function getAll(groupArtefacts){
+    const promises = groupArtefacts.map(getArtefact);
+    await Promise.all(promises);
+  }
+
+  Group.findById(groupId).lean().exec(function(err, group) {
+    if (!err && group) {
+      groupArtefacts = group.artefacts;
+      getAll(groupArtefacts).then(function() {
+        res.send(groupArtefacts);
+      });
     } else {
       res.status(404).send("Group not found.")
     }
@@ -333,19 +346,32 @@ var getAllArtefacts = function (req,res) {
 
 var getAllMembers = function (req,res) {
   var groupId = req.params.id;
-  Group.findById(groupId, function(err, group){
-    if (!err && group) {
-      members = group.members;
-      var memberIds = members.map(x => x.memberId);
-      
-      User.find({_id:{$in:memberIds}}, function (err, members) {
+
+  function getMember(groupMember){
+    var id = mongoose.Types.ObjectId(groupMember.memberId);
+    return new Promise(resolve => {
+      User.find(id, function (err, member) {
         if (!err) {
-          res.send(members);
+          groupMember.member = member;
+          resolve();
         } else {
-          res.status(404).send("No members found.");
+          resolve("Member not found.");
         }
       });
+    });
+  }
 
+  async function getAll(groupMembers){
+    const promises = groupMembers.map(getMember);
+    await Promise.all(promises);
+  }
+
+  Group.findById(groupId).lean().exec(function(err, group){
+    if (!err && group) {
+      groupMembers = group.members;
+      getAll(groupMembers).then(function() {
+        res.send(groupMembers);
+      });
     } else {
       res.status(404).send("Group not found.")
     }

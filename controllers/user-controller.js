@@ -217,17 +217,31 @@ var deleteAll = function(req,res) {
 
 var getAllGroups = function (req,res) {
   var userId = req.params.id;
-  User.findById(userId, function(err, user){
-    if (!err) {
-      var groups = user.groups;
-      var groupIds = groups.map(x => x.groupId);
-      
-      Group.find({_id:{$in:groupIds}}, function (err, groups) {
+
+  function getGroup(oneGroup){
+    var id = mongoose.Types.ObjectId(oneGroup.groupId);
+    return new Promise(resolve => {
+      Group.find(id, function (err, group) {
         if (!err) {
-          res.send(groups);
+          oneGroup.group = group;
+          resolve();
         } else {
-          res.status(404).send("No groups found.");
+          resolve("Group not found.");
         }
+      });
+    });
+  }
+
+  async function getAll(userGroups){
+    const promises = userGroups.map(getGroup);
+    await Promise.all(promises);
+  }
+
+  User.findById(userId).lean().exec( function(err, user){
+    if (!err) {
+      var userGroups = user.groups;
+      getAll(userGroups).then(function() {
+        res.send(userGroups);
       });
 
     } else {
