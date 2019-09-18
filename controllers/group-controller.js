@@ -56,10 +56,9 @@ var updateById = function(req,res){
 
 // create group
 var create = function (req,res) {
-  var adminId = req.params.adminId;
   // create the group
   var group = new Group({
-    adminId: adminId,
+    adminId: req.body.adminId,
 
     title: req.body.title,
     description: req.body.description,

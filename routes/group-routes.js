@@ -14,7 +14,7 @@ router.delete('/group/id/:id', groupCont.deleteById);
 // update group by id
 router.put('/group/id/:id', groupCont.updateById);
 // create new group
-router.post('/group/adminId/:adminId', groupCont.create);
+router.post('/group', groupCont.create);
 // add an artefact to a group
 router.put('/group/id/:id/add/artefactId/:artefactId', groupCont.addArtefact);
 // remove an artefact from a group
