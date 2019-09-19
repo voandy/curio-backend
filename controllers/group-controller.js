@@ -35,13 +35,65 @@ var getById = function(req,res){
 // delete group by id
 var deleteById = function (req,res) {
   var groupId = req.params.id;
-  Group.findByIdAndDelete(groupId, function(err, group) {
-    if(!err) {
-      res.send(groupId + "is deleted");
+  var status = "";
+
+  function removeFromMembers() {
+    return new Promise(resolve => {
+      Group.findById(groupId, function(err, group){
+        if (!err && group) {
+          memberDetails = group.members;
+          var memberIds = memberDetails.map(x => x.memberId);
+          
+          User.find({_id:{$in:memberIds}}, function (err, members) {
+            if (!err) {
+              members.forEach(function(member){
+                groups = member.groups;
+                for(var i = 0; i < groups.length; i++){ 
+                  if (groups[i].groupId === groupId) {
+                    groups.splice(i, 1);
+                    member.save();
+                    break;
+                  }
+                }
+              });
+              resolve();
+            } else {
+              // status = "No members found.";
+              resolve();
+            }
+          });
+    
+        } else {
+          status = "Group not found.";
+          resolve();
+        }
+      });
+    });
+  }
+
+  function deleteGroup() {
+    return new Promise(resolve => {
+      Group.findByIdAndDelete(groupId, function(err) {
+        if(err) {
+          status = "Group not found.";
+          resolve();
+        }
+        resolve();
+      });
+    });
+  }
+
+  async function deleteAll() {
+    await Promise.all([removeFromMembers(), deleteGroup()]);
+  
+    if (status) {
+      res.status(500).send(status);
     } else {
-      res.sendStatus(404);
+      res.send(groupId + " deleted.");
     }
-  })
+  }
+
+  deleteAll();
 };
 
 // update group by id
