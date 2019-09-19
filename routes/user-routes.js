@@ -26,7 +26,10 @@ router.delete('/user/deleteAll', userCont.deleteAll);
 // get all the groups this user in a member of
 router.get('/user/id/:id/groups', userCont.getAllGroups);
 // get user by email or username
-// get user by email
 router.get('/user/idOrEmail/:idOrEmail', userCont.getByUniqueId);
+// post a comment about the user
+router.post("/user/posterId/:posterId/postedOnId/:postedOnId", userCont.postComment);
+// get all comments about this user
+router.get('/user/id/:id/comments', userCont.getAllComments);
 
 module.exports = router;
