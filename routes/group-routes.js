@@ -29,5 +29,9 @@ router.get('/group/id/:id/artefacts', groupCont.getAllArtefacts);
 router.get('/group/id/:id/members', groupCont.getAllMembers);
 // delete all unprotected groups
 router.delete('/group/deleteAll', groupCont.deleteAll);
+// post a comment on group
+router.post('/group/id/:id/userId/:userId/comment', groupCont.postComment);
+// get all comments on group
+router.get('/group/id/:id/getAllComments', groupCont.getAllComments);
 
 module.exports = router;

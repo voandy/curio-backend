@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 // load Artefact model
 const Artefact = mongoose.model("Artefact");
+// load comment model
+const Comment = mongoose.model("Comment");
 
 // get all artefacts
 var getAll = function(req,res){
@@ -245,6 +247,39 @@ var removeImage = function(req, res) {
   });
 }
 
+var postComment = function(req,res) {
+  var artefactId = req.params.id;
+  var userId = req.params.userId;
+
+  var comment = new Comment({
+    posterId: userId,
+    postedOnId: artefactId,
+    datePosted: new Date(),
+    content: req.body.content,
+    protected: false
+  });
+
+  // send it to database
+  comment.save(function (err, newComment) {
+    if(!err){
+      res.send(newComment);
+    }else{
+      res.status(400).send(err);
+    }
+  });
+}
+
+var getAllComments = function(req,res) {
+  var artefactId = req.params.id;
+  Comment.find({postedOnId:artefactId}, function(err, comments){
+    if(!err) {
+      res.send(comments);
+    } else{
+      res.status(404);
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
@@ -257,5 +292,7 @@ module.exports = {
   getLikedUsers,
   deleteAll,
   addImage,
-  removeImage
+  removeImage,
+  postComment,
+  getAllComments
 }

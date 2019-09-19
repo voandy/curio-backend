@@ -13,8 +13,6 @@ router.get('/comment/id/:id', commentCont.getById);
 router.delete('/comment/id/:id', commentCont.deleteById);
 // update comment by id
 router.put('/comment/id/:id', commentCont.updateById);
-// create new comment
-router.post("/comment", commentCont.create);
 // delete all unprotected comments
 router.delete('/user/deleteAll', commentCont.deleteAll);
 

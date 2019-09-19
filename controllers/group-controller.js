@@ -6,6 +6,8 @@ const Group = mongoose.model("Group");
 const User = mongoose.model("User");
 // load Artefact model
 const Artefact = mongoose.model("Artefact");
+// load comment model
+const Comment = mongoose.model("Comment");
 
 // get all groups
 var getAll = function(req,res){
@@ -387,6 +389,39 @@ var deleteAll = function(req, res) {
   });
 }
 
+var postComment = function(req,res) {
+  var groupId = req.params.id;
+  var userId = req.params.userId;
+
+  var comment = new Comment({
+    posterId: userId,
+    postedOnId: groupId,
+    datePosted: new Date(),
+    content: req.body.content,
+    protected: false
+  });
+
+  // send it to database
+  comment.save(function (err, newComment) {
+    if(!err){
+      res.send(newComment);
+    }else{
+      res.status(400).send(err);
+    }
+  });
+}
+
+var getAllComments = function(req,res) {
+  var groupId = req.params.id;
+  Comment.find({postedOnId:groupId}, function(err, comments){
+    if(!err) {
+      res.send(comments);
+    } else{
+      res.status(404);
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
@@ -399,5 +434,7 @@ module.exports = {
   removeMember,
   getAllArtefacts,
   getAllMembers,
-  deleteAll
+  deleteAll,
+  postComment,
+  getAllComments
 }

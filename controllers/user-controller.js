@@ -243,6 +243,39 @@ var getAllGroups = function (req,res) {
   });
 }
 
+var postComment = function(req,res) {
+  var posterId = req.params.posterId;
+  var postedOnId = req.params.postedOnId;
+
+  var comment = new Comment({
+    posterId: posterId,
+    postedOnId: postedOnId,
+    datePosted: new Date(),
+    content: req.body.content,
+    protected: false
+  });
+
+  // send it to database
+  comment.save(function (err, newComment) {
+    if(!err){
+      res.send(newComment);
+    }else{
+      res.status(400).send(err);
+    }
+  });
+}
+
+var getAllComments = function(req,res) {
+  var userId = req.params.id;
+  Comment.find({postedOnId:userId}, function(err, comments){
+    if(!err) {
+      res.send(comments);
+    } else{
+      res.status(404);
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
@@ -253,5 +286,7 @@ module.exports = {
   register,
   login,
   deleteAll,
-  getAllGroups
+  getAllGroups,
+  postComment,
+  getAllComments
 }

@@ -4,6 +4,8 @@ const Schema = mongoose.Schema;
 const commentSchema = new Schema(
   {
     posterId: { type: String, required: true },
+    // the id of a artefact or group
+    postedOnId: { type: String, required: true },
     datePosted: { type: Date, default: Date.now },
     content: String,
     protected: { type: Boolean, default: false }

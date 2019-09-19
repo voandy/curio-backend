@@ -50,25 +50,6 @@ var updateById = function(req,res){
   });
 };
 
-// create comment
-var create = function (req,res) {
-  // create the artefact
-  var comment = new Artefact({
-    posterId: req.body.posterId,
-    datePosted: new Date(),
-    content: req.body.content
-  });
-
-  // send it to database
-  comment.save(function (err, newComment) {
-    if(!err){
-      res.send(newComment);
-    }else{
-      res.status(400).send(err);
-    }
-  });
-}
-
 // delete all unprotected comments
 var deleteAll = function(req,res) {
   Comment.find({ protected: { $ne: true } }, function(err, unprotectedComments){
@@ -95,6 +76,5 @@ module.exports = {
   getById,
   deleteById,
   updateById,
-  create,
   deleteAll
 }
