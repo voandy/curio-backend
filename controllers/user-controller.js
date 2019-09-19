@@ -151,11 +151,11 @@ var login = function(req,res){
     return res.status(400).json(errors);
   }
 
-  const useroremail = req.body.email;
+  const idOrEmail = req.body.email;
   const password = req.body.password;
 
   // Find user by email
-  User.findOne({ $or: [{email: useroremail},{username: useroremail}] }).then(user => {
+  User.findOne({ $or: [{email: idOrEmail},{username: idOrEmail}] }).then(user => {
 
     // Check if user exists
     if (!user) {
@@ -243,6 +243,7 @@ var getAllGroups = function (req,res) {
   });
 }
 
+// post a comment about a user
 var postComment = function(req,res) {
   var posterId = req.params.posterId;
   var postedOnId = req.params.postedOnId;
@@ -265,6 +266,7 @@ var postComment = function(req,res) {
   });
 }
 
+// get all comments about this user
 var getAllComments = function(req,res) {
   var userId = req.params.id;
   Comment.find({postedOnId:userId}, function(err, comments){
@@ -272,6 +274,19 @@ var getAllComments = function(req,res) {
       res.send(comments);
     } else{
       res.status(404);
+    }
+  });
+}
+
+// get a user by email/username
+var getByUniqueId = function(req,res) {
+  const idOrEmail = req.body.idOrEmail;
+
+  User.findOne({ $or: [{email: idOrEmail},{username: idOrEmail}] }, function(err, user){
+    if (!err && user) {
+      res.send(user);
+    } else {
+      res.status(404).send("User not found.");
     }
   });
 }
@@ -288,5 +303,6 @@ module.exports = {
   deleteAll,
   getAllGroups,
   postComment,
-  getAllComments
+  getAllComments,
+  getByUniqueId
 }
