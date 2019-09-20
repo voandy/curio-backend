@@ -44,7 +44,6 @@ function removeFromMembers(groupId) {
         User.find({_id:{$in:memberIds}}, function (err, members) {
           if (!err) {
             members.forEach(function(member){
-              console.log("Removing " + group._id + " from " + member.name);
               groups = member.groups;
 
               for(var i = 0; i < groups.length; i++){ 
@@ -413,17 +412,15 @@ var getAllMembers = function (req,res) {
 
 // delete all unprotected groups
 var deleteAll = function(req, res) {
-  var example = async (unprotectedGroups) => {
+  var removeFromAllMembers = async (unprotectedGroups) => {
     for (var group of unprotectedGroups) {
-     const result = await removeFromMembers(group._id);
-     console.log(result);
+     await removeFromMembers(group._id);
     }
-    console.log('after forEach');
   }
   
   Group.find({ protected: { $ne: true } }, function(err, unprotectedGroups){
     if(!err) {
-      example(unprotectedGroups).then(function () {
+      removeFromAllMembers(unprotectedGroups).then(function () {
         unprotectedGroups.forEach(function(group) {
           groupId = group._id;
 
