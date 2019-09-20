@@ -32,48 +32,49 @@ var getById = function(req,res){
   });
 };
 
+// delete the all references to this group from it's members
+function removeFromMembers(groupId) {
+  return new Promise(resolve => {
+
+    Group.findById(groupId, function(err, group){
+      if (!err && group) {
+        memberDetails = group.members;
+        var memberIds = memberDetails.map(x => x.memberId);
+        
+        User.find({_id:{$in:memberIds}}, function (err, members) {
+          if (!err) {
+            members.forEach(function(member){
+              console.log("Removing " + group._id + " from " + member.name);
+              groups = member.groups;
+
+              for(var i = 0; i < groups.length; i++){ 
+                if (groups[i].groupId == groupId) {
+                  groups.splice(i, 1);
+                  member.save();
+                  break;
+                }
+              }
+
+            });
+            resolve();
+          } else {
+            // reject("No members found.");
+            resolve();
+          }
+        });
+      } else {
+        reject("Group not found.");
+      }
+    });
+  });
+}
+
 // delete group by id
 var deleteById = function (req,res) {
   var groupId = req.params.id;
 
-  // first delete the all references to this group from it's members
-  function removeFromMembers() {
-    return new Promise(resolve => {
-
-      Group.findById(groupId, function(err, group){
-        if (!err && group) {
-          memberDetails = group.members;
-          var memberIds = memberDetails.map(x => x.memberId);
-          
-          User.find({_id:{$in:memberIds}}, function (err, members) {
-            if (!err) {
-              members.forEach(function(member){
-                groups = member.groups;
-
-                for(var i = 0; i < groups.length; i++){ 
-                  if (groups[i].groupId === groupId) {
-                    groups.splice(i, 1);
-                    member.save();
-                    break;
-                  }
-                }
-
-              });
-              resolve();
-            } else {
-              // reject("No members found.");
-              resolve();
-            }
-          });
-        } else {
-          reject("Group not found.");
-        }
-      });
-    });
-  }
-
-  // then delete the group
-  removeFromMembers().then(function () {
+  // delete references to the group in users then delete the group
+  removeFromMembers(groupId).then(function () {
     Group.findByIdAndDelete(groupId, function(err) {
       if(!err) {
         res.send(groupId + " deleted.");
@@ -412,19 +413,30 @@ var getAllMembers = function (req,res) {
 
 // delete all unprotected groups
 var deleteAll = function(req, res) {
+  var example = async (unprotectedGroups) => {
+    for (var group of unprotectedGroups) {
+     const result = await removeFromMembers(group._id);
+     console.log(result);
+    }
+    console.log('after forEach');
+  }
+  
   Group.find({ protected: { $ne: true } }, function(err, unprotectedGroups){
     if(!err) {
-      unprotectedGroups.forEach(function(group){
-        var groupId = group._id;
-        Group.findByIdAndDelete(groupId, function(err) {
-          if(!err) {
-            console.log(groupId + " deleted.")
-          } else{
-            res.sendStatus(404);
-          }
-        })
+      example(unprotectedGroups).then(function () {
+        unprotectedGroups.forEach(function(group) {
+          groupId = group._id;
+
+          Group.findByIdAndDelete(groupId, function(err) {
+            if(err) {
+              res.status(500).send("Unable to delete all groups.");
+            }
+          });
+        });
+        res.send("Completed!");
+      }, function (error) {
+        res.send(error);
       });
-      res.send("completed!")
     } else{
       res.status(500);
     }
