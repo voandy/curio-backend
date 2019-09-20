@@ -35,10 +35,11 @@ var getById = function(req,res){
 // delete group by id
 var deleteById = function (req,res) {
   var groupId = req.params.id;
-  var status = "";
 
+  // first delete the all references to this group from it's members
   function removeFromMembers() {
     return new Promise(resolve => {
+
       Group.findById(groupId, function(err, group){
         if (!err && group) {
           memberDetails = group.members;
@@ -48,6 +49,7 @@ var deleteById = function (req,res) {
             if (!err) {
               members.forEach(function(member){
                 groups = member.groups;
+
                 for(var i = 0; i < groups.length; i++){ 
                   if (groups[i].groupId === groupId) {
                     groups.splice(i, 1);
@@ -55,45 +57,33 @@ var deleteById = function (req,res) {
                     break;
                   }
                 }
+
               });
               resolve();
             } else {
-              // status = "No members found.";
+              // reject("No members found.");
               resolve();
             }
           });
-    
         } else {
-          status = "Group not found.";
-          resolve();
+          reject("Group not found.");
         }
       });
     });
   }
 
-  function deleteGroup() {
-    return new Promise(resolve => {
-      Group.findByIdAndDelete(groupId, function(err) {
-        if(err) {
-          status = "Group not found.";
-          resolve();
-        }
-        resolve();
-      });
+  // then delete the group
+  removeFromMembers().then(function () {
+    Group.findByIdAndDelete(groupId, function(err) {
+      if(!err) {
+        res.send(groupId + " deleted.");
+      } else {
+        res.status(500).send(err);
+      }
     });
-  }
-
-  async function deleteAll() {
-    await Promise.all([removeFromMembers(), deleteGroup()]);
-  
-    if (status) {
-      res.status(500).send(status);
-    } else {
-      res.send(groupId + " deleted.");
-    }
-  }
-
-  deleteAll();
+  }, function(error){
+    res.send(error);
+  });
 };
 
 // update group by id
