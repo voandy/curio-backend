@@ -434,7 +434,7 @@ var deleteAll = function(req, res) {
       }, function (error) {
         res.send(error);
       });
-    } else{
+    } else {
       res.status(500);
     }
   });
