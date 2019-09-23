@@ -1,30 +1,33 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema(
-  {
-    email: { type: String, required: true },
-    // username: { type: String, required: true },
-    username: String,
-    name: { type: String, required: true },
-    password: { type: String, required: true },
+const userSchema = new Schema({
+  email: { type: String, required: true },
+  // username: { type: String, required: true },
+  username: String,
+  name: { type: String, required: true },
+  password: { type: String, required: true },
 
-    dateJoined: { type: Date, default: Date.now },
-    dob: Date,
+  dateJoined: { type: Date, default: Date.now },
+  dob: Date,
 
-    profilePic: String,
+  profilePic: String,
 
-    // list of groups of which this user is a member
-    groups: [{
+  // list of groups of which this user is a member
+  groups: [
+    {
       groupId: String,
       dateJoined: { type: Date, default: Date.now },
       pinned: Boolean
-    }],
+    }
+  ],
 
-    protected: { type: Boolean, default: false }
-  }
-);
+  protected: { type: Boolean, default: false },
 
-const User = mongoose.model('User', userSchema);
+  // user's Expo Push Token
+  userPushToken: { type: String, required: false }
+});
+
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
