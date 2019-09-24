@@ -23,14 +23,7 @@ var getById = function(req, res) {
   var artefactId = req.params.id;
   Artefact.findById(artefactId).lean().exec(function(err, artefact) {
     if (!err && artefact) {
-      Comment.find({ postedOnId: artefactId }, function(err, comments) {
-        if (!err) {
-          artefact.comments = comments;
-          res.send(artefact);
-        } else {
-          res.status(404);
-        }
-      });
+      res.send(artefact);
     } else {
       res.sendStatus(404);
     }
