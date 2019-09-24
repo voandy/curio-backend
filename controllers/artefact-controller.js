@@ -120,9 +120,32 @@ var create = function(req, res) {
 // given a userId returns all artefacts posted by that user
 var getByUser = function(req, res) {
   var userId = req.params.userId;
-  Artefact.find({ userId: userId }, function(err, artefacts) {
+
+  function addComments(artefact) {
+    return new Promise((resolve, reject) => {
+      artefactId = artefact._id;
+      artefact.comments = [];
+      Comment.find({ postedOnId: artefactId }, function(err, comments) {
+        if (!err) {
+          artefact.comments = comments;
+          resolve(artefact);
+        } else {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  async function addCommentsAll(artefacts){
+    const promises = artefacts.map(addComments);
+    await Promise.all(promises);
+  }
+
+  Artefact.find({ userId: userId }).lean().exec(function(err, artefacts) {
     if (!err) {
-      res.send(artefacts);
+      addCommentsAll(artefacts).then(function(){
+        res.send(artefacts);
+      });
     } else {
       res.status(404);
     }
