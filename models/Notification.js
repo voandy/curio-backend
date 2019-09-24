@@ -1,22 +1,22 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const notificationSchema = new Schema(
-  {
-    userId: { type: String, required: true },
-    datePosted: { type: Date, default: Date.now },
-    content: String,
+const notificationSchema = new Schema({
+  userId: { type: String, required: true },
+  userPushToken: { type: String, required: true },
 
-    thumbnailURL: String,
-    seenStatus: { type: Boolean, required: true, deault: false },
+  datePosted: { type: Date, default: Date.now },
+  data: String,
 
-    category: { type: String, required: true },
-    refId: { type: String, required: true },
+  thumbnailURL: String,
+  seenStatus: { type: Boolean, required: true, default: false },
 
-    protected: { type: Boolean, default: false }
-  }
-);
+  category: { type: String, required: true },
+  refId: { type: String, required: true },
 
-const Notification = mongoose.model('Notification', notificationSchema);
+  protected: { type: Boolean, default: false }
+});
+
+const Notification = mongoose.model("Notification", notificationSchema);
 
 module.exports = Notification;

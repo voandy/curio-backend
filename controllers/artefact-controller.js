@@ -1,12 +1,14 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // load Artefact model
 const Artefact = mongoose.model("Artefact");
 // load comment model
 const Comment = mongoose.model("Comment");
 
+const trigger = require("../services/notification/triggers");
+
 // get all artefacts
-var getAll = function(req,res){
+var getAll = function(req, res) {
   Artefact.find(function(err, artefacts) {
     if (!err) {
       res.send(artefacts);
@@ -17,9 +19,9 @@ var getAll = function(req,res){
 };
 
 // get artefact by id
-var getById = function(req,res){
+var getById = function(req, res) {
   var artefactId = req.params.id;
-  Artefact.findById(artefactId, function(err, artefact){
+  Artefact.findById(artefactId, function(err, artefact) {
     if (!err && artefact) {
       res.send(artefact);
     } else {
@@ -29,22 +31,22 @@ var getById = function(req,res){
 };
 
 // delete artefact by id
-var deleteById = function (req,res) {
+var deleteById = function(req, res) {
   var artefactId = req.params.id;
   Artefact.findByIdAndDelete(artefactId, function(err, artefact) {
-    if(!err) {
+    if (!err) {
       res.send(artefactId + "is deleted");
     } else {
       res.sendStatus(404);
     }
-  })
+  });
 };
 
 // update artefact by id
-var updateById = function(req,res){
+var updateById = function(req, res) {
   var artefactId = req.params.id;
   Artefact.findByIdAndUpdate(artefactId, req.body, function(err, artefact) {
-    if(!err) {
+    if (!err) {
       res.send(artefact);
     } else {
       res.sendStatus(404);
@@ -53,7 +55,7 @@ var updateById = function(req,res){
 };
 
 // create artefact
-var create = function (req,res) {
+var create = function(req, res) {
   // create the artefact
   var artefact = new Artefact({
     userId: req.body.userId,
@@ -83,8 +85,8 @@ var create = function (req,res) {
   if (req.body.imageURL) {
     var newImage = {
       URL: req.body.imageURL,
-      dateAdded: new Date(),
-    }
+      dateAdded: new Date()
+    };
     artefact.images = [newImage];
   } else {
     artefact.images = [];
@@ -98,114 +100,121 @@ var create = function (req,res) {
   }
 
   // send it to database
-  artefact.save(function (err, newArtefact) {
-    if(!err){
+  artefact.save(function(err, newArtefact) {
+    if (!err) {
       res.send(newArtefact);
-    }else{
+    } else {
       res.status(400).send(err);
     }
   });
-}
+};
 
 // given a userId returns all artefacts posted by that user
-var getByUser = function(req,res) {
+var getByUser = function(req, res) {
   var userId = req.params.userId;
-  Artefact.find({userId:userId}, function(err, artefacts){
-    if(!err) {
+  Artefact.find({ userId: userId }, function(err, artefacts) {
+    if (!err) {
       res.send(artefacts);
-    } else{
+    } else {
       res.status(404);
     }
   });
-}
+};
 
-var like = function(req,res) {
+// record and increment the like of the artefact by 1
+var like = function(req, res) {
   var artefactId = req.params.id;
   var userId = req.params.userId;
-  Artefact.findById(artefactId, function(err, artefact){
-    if (!err) {
+  Artefact.findById(artefactId, function(err, artefact) {
+    if (!err && artefact) {
       likes = artefact.likes;
       var index = likes.indexOf(userId);
-
+      // if user isn't in the likes array
       if (index < 0) {
         likes = artefact.likes;
         likes.push(userId);
         artefact.likes = likes;
         artefact.save();
         res.send(artefact);
+        // trigger notification
+        trigger.triggerArtefactNotification(artefactId, userId);
+        // other user has already liked the artefact
       } else {
         res.status(400).send("User already liked this artefact");
       }
     } else {
-      res.status(404).send("Group not found.");
+      res.status(404).send("Artefact not found.");
     }
   });
-}
+};
 
-var unlike = function(req,res) {
+// record and decrement the like of the artefact by 1
+var unlike = function(req, res) {
   var artefactId = req.params.id;
   var userId = req.params.userId;
-  Artefact.findById(artefactId, function(err, artefact){
-    if (!err) {
+  Artefact.findById(artefactId, function(err, artefact) {
+    if (!err && artefact) {
       likes = artefact.likes;
-
       var index = likes.indexOf(userId);
+      // if user is in likes array
       if (index >= 0) {
         likes.splice(index, 1);
+        artefact.likes = likes;
+        artefact.save();
+        res.send(artefact);
+        // user hasn't liked the artefact before
       } else {
-        res.status(404).send("User not found.");
+        res.status(404).send("User has not liked this artefact.");
       }
-
-      artefact.likes = likes;
-      artefact.save();
-      res.send(artefact);
     } else {
-      res.status(404).send("Group not found.");
+      res.status(404).send("Artefact not found.");
     }
   });
-}
+};
 
 // returns all users who like this artefact
-var getLikedUsers = function(req,res) {
+var getLikedUsers = function(req, res) {
   var artefactId = req.params.id;
-  Artefact.findById(artefactId, function(err, artefact){
+  Artefact.findById(artefactId, function(err, artefact) {
     if (!err) {
       likes = artefact.likes;
-      
-      User.find({_id:{$in:likes}}, function (err, users) {
+
+      User.find({ _id: { $in: likes } }, function(err, users) {
         if (!err) {
           res.send(users);
         } else {
           res.status(404).send("No users found.");
         }
       });
-
     } else {
-      res.status(404).send("Artefact not found.")
+      res.status(404).send("Artefact not found.");
     }
   });
-}
+};
 
 // delete all unprotected artefacts
 var deleteAll = function(req, res) {
-  Artefact.find({ protected: { $ne: true } }, function(err, unprotectedArtefacts){
-    if(!err) {
-      unprotectedArtefacts.forEach(function(artefact){
+  Artefact.find({ protected: { $ne: true } }, function(
+    err,
+    unprotectedArtefacts
+  ) {
+    if (!err) {
+      unprotectedArtefacts.forEach(function(artefact) {
         var artefactId = artefact._id;
         Artefact.findByIdAndDelete(artefactId, function(err) {
-          if(!err) {
-            console.log(artefactId + " deleted.")
-          } else{
+          if (!err) {
+            console.log(artefactId + " deleted.");
+          } else {
             res.sendStatus(500);
           }
-        })
+        });
       });
-      res.send("completed!")
-    } else{
+      res.send("completed!");
+    } else {
       res.status(500);
     }
   });
-}
+};
 
 // add an image to an artefact
 var addImage = function(req, res) {
@@ -213,10 +222,10 @@ var addImage = function(req, res) {
 
   var newImage = {
     URL: req.body.imageURL,
-    dateAdded: new Date(),
-  }
+    dateAdded: new Date()
+  };
 
-  Artefact.findById(artefactId, function(err, artefact){
+  Artefact.findById(artefactId, function(err, artefact) {
     if (!err && artefact) {
       images = artefact.images;
       images.push(newImage);
@@ -227,14 +236,14 @@ var addImage = function(req, res) {
       res.sendStatus(404);
     }
   });
-}
+};
 
 // remove an image to an artefact
 var removeImage = function(req, res) {
   var artefactId = req.params.id;
   var imageIndex = req.body.imageIndex;
 
-  Artefact.findById(artefactId, function(err, artefact){
+  Artefact.findById(artefactId, function(err, artefact) {
     if (!err && artefact) {
       images = artefact.images;
       images.splice(imageIndex, 1);
@@ -245,9 +254,10 @@ var removeImage = function(req, res) {
       res.sendStatus(404);
     }
   });
-}
+};
 
-var postComment = function(req,res) {
+// add new comment posted to database
+var postComment = function(req, res) {
   var artefactId = req.params.id;
   var userId = req.params.userId;
 
@@ -258,27 +268,28 @@ var postComment = function(req,res) {
     content: req.body.content,
     protected: false
   });
-
   // send it to database
-  comment.save(function (err, newComment) {
-    if(!err){
+  comment.save(function(err, newComment) {
+    if (!err) {
       res.send(newComment);
-    }else{
+      // trigger notification
+      trigger.triggerArtefactNotification(artefactId, userId, newComment);
+    } else {
       res.status(400).send(err);
     }
   });
-}
+};
 
-var getAllComments = function(req,res) {
+var getAllComments = function(req, res) {
   var artefactId = req.params.id;
-  Comment.find({postedOnId:artefactId}, function(err, comments){
-    if(!err) {
+  Comment.find({ postedOnId: artefactId }, function(err, comments) {
+    if (!err) {
       res.send(comments);
-    } else{
+    } else {
       res.status(404);
     }
   });
-}
+};
 
 module.exports = {
   getAll,
@@ -295,4 +306,4 @@ module.exports = {
   removeImage,
   postComment,
   getAllComments
-}
+};
