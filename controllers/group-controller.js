@@ -112,6 +112,8 @@ var create = function (req,res) {
     artefacts:[],
     members:[],
 
+    likes: [],
+
     protected: false
   });
 
@@ -473,6 +475,74 @@ var getAllComments = function(req,res) {
   });
 }
 
+// like the group
+var like = function(req,res) {
+  var groupId = req.params.id;
+  var userId = req.params.userId;
+  Group.findById(groupId, function(err, group){
+    if (!err) {
+      likes = group.likes;
+      var index = likes.indexOf(userId);
+
+      if (index < 0) {
+        likes.push(userId);
+        group.likes = likes;
+        group.save();
+        res.send(group);
+      } else {
+        res.status(400).send("User already liked this group");
+      }
+    } else {
+      res.status(404).send("Group not found.");
+    }
+  });
+}
+
+// unlike the group
+var unlike = function(req,res) {
+  var groupId = req.params.id;
+  var userId = req.params.userId;
+  Group.findById(groupId, function(err, group){
+    if (!err) {
+      likes = group.likes;
+
+      var index = likes.indexOf(userId);
+      if (index >= 0) {
+        likes.splice(index, 1);
+      } else {
+        res.status(404).send("User not found.");
+      }
+
+      group.likes = likes;
+      group.save();
+      res.send(group);
+    } else {
+      res.status(404).send("Group not found.");
+    }
+  });
+}
+
+// returns all users who like this artefact
+var getLikedUsers = function(req,res) {
+  var groupId = req.params.id;
+  Group.findById(groupId, function(err, group){
+    if (!err) {
+      likes = group.likes;
+      
+      User.find({_id:{$in:likes}}, function (err, users) {
+        if (!err) {
+          res.send(users);
+        } else {
+          res.status(404).send("No users found.");
+        }
+      });
+
+    } else {
+      res.status(404).send("Artefact not found.")
+    }
+  });
+}
+
 module.exports = {
   getAll,
   getById,
@@ -487,5 +557,8 @@ module.exports = {
   getAllMembers,
   deleteAll,
   postComment,
-  getAllComments
+  getAllComments,
+  like,
+  unlike,
+  getLikedUsers
 }

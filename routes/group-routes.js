@@ -33,5 +33,9 @@ router.delete('/group/deleteAll', groupCont.deleteAll);
 router.post('/group/id/:id/userId/:userId/comment', groupCont.postComment);
 // get all comments on group
 router.get('/group/id/:id/getAllComments', groupCont.getAllComments);
+// like an group
+router.post('/group/id/:id/userId/:userId/like', groupCont.like);
+// unlike an group
+router.post('/group/id/:id/userId/:userId/unlike', groupCont.unlike);
 
 module.exports = router;

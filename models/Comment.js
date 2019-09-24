@@ -7,7 +7,7 @@ const commentSchema = new Schema(
     // the id of a artefact or group
     postedOnId: { type: String, required: true },
     datePosted: { type: Date, default: Date.now },
-    content: String,
+    content: { type: String, required: true },
     protected: { type: Boolean, default: false }
   }
 );

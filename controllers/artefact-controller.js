@@ -21,9 +21,16 @@ var getAll = function(req, res) {
 // get artefact by id
 var getById = function(req, res) {
   var artefactId = req.params.id;
-  Artefact.findById(artefactId, function(err, artefact) {
+  Artefact.findById(artefactId).lean().exec(function(err, artefact) {
     if (!err && artefact) {
-      res.send(artefact);
+      Comment.find({ postedOnId: artefactId }, function(err, comments) {
+        if (!err) {
+          artefact.comments = comments;
+          res.send(artefact);
+        } else {
+          res.status(404);
+        }
+      });
     } else {
       res.sendStatus(404);
     }
