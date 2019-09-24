@@ -17,6 +17,7 @@ const userRoutes = require("./routes/user-routes.js");
 const artefactRoutes = require("./routes/artefact-routes.js");
 const groupRoutes = require("./routes/group-routes.js");
 const commentRoutes = require("./routes/comment-routes.js");
+const notificationRoutes = require("./routes/notification-routes.js");
 
 // Bodyparser middleware
 app.use(
@@ -35,6 +36,7 @@ app.use("/api", userRoutes);
 app.use("/api", artefactRoutes);
 app.use("/api", groupRoutes);
 app.use("/api", commentRoutes);
+app.use("/api", notificationRoutes);
 
 // listen
 app.listen(port, function() {

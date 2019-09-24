@@ -6,7 +6,7 @@ const notificationSchema = new Schema({
   userPushToken: { type: String, required: true },
 
   datePosted: { type: Date, default: Date.now },
-  content: String,
+  data: String,
 
   thumbnailURL: String,
   seenStatus: { type: Boolean, required: true, default: false },

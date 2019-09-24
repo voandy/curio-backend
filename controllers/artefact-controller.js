@@ -5,7 +5,7 @@ const Artefact = mongoose.model("Artefact");
 // load comment model
 const Comment = mongoose.model("Comment");
 
-const artefactNotification = require("../services/notification/artefact-notification");
+const trigger = require("../services/notification/triggers");
 
 // get all artefacts
 var getAll = function(req, res) {
@@ -121,6 +121,7 @@ var getByUser = function(req, res) {
   });
 };
 
+// record and increment the like of the artefact by 1
 var like = function(req, res) {
   var artefactId = req.params.id;
   var userId = req.params.userId;
@@ -128,7 +129,7 @@ var like = function(req, res) {
     if (!err && artefact) {
       likes = artefact.likes;
       var index = likes.indexOf(userId);
-
+      // if user isn't in the likes array
       if (index < 0) {
         likes = artefact.likes;
         likes.push(userId);
@@ -136,7 +137,8 @@ var like = function(req, res) {
         artefact.save();
         res.send(artefact);
         // trigger notification
-        artefactNotification.triggerLikeNotification(artefactId, userId);
+        trigger.triggerArtefactNotification(artefactId, userId);
+        // other user has already liked the artefact
       } else {
         res.status(400).send("User already liked this artefact");
       }
@@ -146,25 +148,26 @@ var like = function(req, res) {
   });
 };
 
+// record and decrement the like of the artefact by 1
 var unlike = function(req, res) {
   var artefactId = req.params.id;
   var userId = req.params.userId;
   Artefact.findById(artefactId, function(err, artefact) {
     if (!err && artefact) {
       likes = artefact.likes;
-
       var index = likes.indexOf(userId);
+      // if user is in likes array
       if (index >= 0) {
         likes.splice(index, 1);
+        artefact.likes = likes;
+        artefact.save();
+        res.send(artefact);
+        // user hasn't liked the artefact before
       } else {
-        res.status(404).send("User not found.");
+        res.status(404).send("User has not liked this artefact.");
       }
-
-      artefact.likes = likes;
-      artefact.save();
-      res.send(artefact);
     } else {
-      res.status(404).send("Group not found.");
+      res.status(404).send("Artefact not found.");
     }
   });
 };
@@ -253,6 +256,7 @@ var removeImage = function(req, res) {
   });
 };
 
+// add new comment posted to database
 var postComment = function(req, res) {
   var artefactId = req.params.id;
   var userId = req.params.userId;
@@ -264,11 +268,12 @@ var postComment = function(req, res) {
     content: req.body.content,
     protected: false
   });
-
   // send it to database
   comment.save(function(err, newComment) {
     if (!err) {
       res.send(newComment);
+      // trigger notification
+      trigger.triggerArtefactNotification(artefactId, userId, newComment);
     } else {
       res.status(400).send(err);
     }
