@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const User = mongoose.model("User");
 // load Group model
 const Group = mongoose.model("Group");
+// load comment model
+const Comment = mongoose.model("Comment");
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -269,9 +271,31 @@ var postComment = function(req,res) {
 // get all comments about this user
 var getAllComments = function(req,res) {
   var userId = req.params.id;
+
+  function addPictures(comment) {
+    return new Promise((resolve, reject) => {
+      userId = comment.posterId;
+      User.findById(userId, function(err, user) {
+        if (!err) {
+          comment.posterPic = user.profilePic;
+          resolve(comment);
+        } else {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  async function addAllPictures(comments){
+    const promises = comments.map(addPictures);
+    await Promise.all(promises);
+  }
+
   Comment.find({postedOnId:userId}, function(err, comments){
     if(!err) {
-      res.send(comments);
+      addAllPictures(comments).then(function(){
+        res.send(comments);
+      });
     } else{
       res.status(404);
     }

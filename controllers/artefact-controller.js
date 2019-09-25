@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 const Artefact = mongoose.model("Artefact");
 // load comment model
 const Comment = mongoose.model("Comment");
+// load User model
+const User = mongoose.model("User");
 
 const trigger = require("../services/notification/triggers");
 
@@ -282,9 +284,31 @@ var postComment = function(req, res) {
 
 var getAllComments = function(req, res) {
   var artefactId = req.params.id;
-  Comment.find({ postedOnId: artefactId }, function(err, comments) {
-    if (!err) {
-      res.send(comments);
+
+  function addPictures(comment) {
+    return new Promise((resolve, reject) => {
+      userId = comment.posterId;
+      User.findById(userId, function(err, user) {
+        if (!err) {
+          comment.posterPic = user.profilePic;
+          resolve(comment);
+        } else {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  async function addAllPictures(comments){
+    const promises = comments.map(addPictures);
+    await Promise.all(promises);
+  }
+
+  Comment.find({ postedOnId: artefactId }).lean().exec(function(err, comments) {
+    if (!err && comments) {
+      addAllPictures(comments).then(function(){
+        res.send(comments);
+      });
     } else {
       res.status(404);
     }
