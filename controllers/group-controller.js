@@ -467,12 +467,13 @@ var postComment = function(req,res) {
 var getAllComments = function(req,res) {
   var groupId = req.params.id;
 
-  function addPictures(comment) {
+  function addPoster(comment) {
     return new Promise((resolve, reject) => {
       userId = comment.posterId;
       User.findById(userId, function(err, user) {
         if (!err) {
           comment.posterPic = user.profilePic;
+          comment.posterName = user.name;
           resolve(comment);
         } else {
           reject(err);
@@ -481,14 +482,14 @@ var getAllComments = function(req,res) {
     });
   }
 
-  async function addAllPictures(comments){
-    const promises = comments.map(addPictures);
+  async function addAllPosters(comments){
+    const promises = comments.map(addPoster);
     await Promise.all(promises);
   }
 
   Comment.find({postedOnId:groupId}, function(err, comments){
     if(!err) {
-      addAllPictures(comments).then(function(){
+      addAllPosters(comments).then(function(){
         res.send(comments);
       });
     } else{
