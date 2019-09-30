@@ -309,6 +309,8 @@ var getAllComments = function(req, res) {
     if (!err && comments) {
       addAllPosters(comments).then(function(){
         res.send(comments);
+      }).catch(function(){
+        res.status(500);
       });
     } else {
       res.status(404);
