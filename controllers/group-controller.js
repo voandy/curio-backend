@@ -566,6 +566,18 @@ var getLikedUsers = function(req,res) {
   });
 }
 
+var groupSearch = function(req, res) {
+  var searchTerms = req.body.searchTerms;
+
+  Group.find({ $text: { $search: searchTerms } }, function(err, results) {
+    if (!err && results) {
+      res.send(results);
+    } else {
+      res.status(404).send("No groups found.");
+    }
+  });
+};
+
 module.exports = {
   getAll,
   getById,
@@ -583,5 +595,6 @@ module.exports = {
   getAllComments,
   like,
   unlike,
-  getLikedUsers
+  getLikedUsers,
+  groupSearch
 }

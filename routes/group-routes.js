@@ -37,5 +37,7 @@ router.get('/group/id/:id/getAllComments', groupCont.getAllComments);
 router.post('/group/id/:id/userId/:userId/like', groupCont.like);
 // unlike an group
 router.post('/group/id/:id/userId/:userId/unlike', groupCont.unlike);
+// serch for groups by search terms
+router.put('/group/search', groupCont.groupSearch);
 
 module.exports = router;

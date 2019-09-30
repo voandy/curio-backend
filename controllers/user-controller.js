@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // load User model
 const User = mongoose.model("User");
@@ -17,7 +17,7 @@ const validateRegisterInput = require("../services/validation/register");
 const validateLoginInput = require("../services/validation/login");
 
 // get all users
-var getAll = function(req,res){
+var getAll = function(req, res) {
   User.find(function(err, users) {
     if (!err) {
       res.send(users);
@@ -28,9 +28,9 @@ var getAll = function(req,res){
 };
 
 // get user by id
-var getById = function(req,res){
+var getById = function(req, res) {
   var userId = req.params.id;
-  User.findById(userId, function(err, user){
+  User.findById(userId, function(err, user) {
     if (!err && user) {
       res.send(user);
     } else {
@@ -40,22 +40,22 @@ var getById = function(req,res){
 };
 
 // delete user by id
-var deleteById = function (req,res) {
+var deleteById = function(req, res) {
   var userId = req.params.id;
   User.findByIdAndDelete(userId, function(err, user) {
-    if(!err) {
+    if (!err) {
       res.send(userId + "is deleted");
-    } else{
+    } else {
       res.sendStatus(404);
     }
-  })
+  });
 };
 
 // update user by id
-var updateById = function(req,res){
+var updateById = function(req, res) {
   var userId = req.params.id;
   User.findByIdAndUpdate(userId, req.body, function(err, user) {
-    if(!err) {
+    if (!err) {
       res.send(userId + "is updated");
     } else {
       res.sendStatus(404);
@@ -64,10 +64,10 @@ var updateById = function(req,res){
 };
 
 // get user by email
-var getByEmail = function(req,res){
+var getByEmail = function(req, res) {
   var userEmail = req.params.email;
-  User.find({email: userEmail}, function(err, user) {
-    if(!err) {
+  User.find({ email: userEmail }, function(err, user) {
+    if (!err) {
       res.send(user);
     } else {
       res.sendStatus(404);
@@ -76,10 +76,10 @@ var getByEmail = function(req,res){
 };
 
 // get user by username
-var getByUsername = function(req,res){
+var getByUsername = function(req, res) {
   var username = req.params.username;
-  User.find({username: username}, function(err, user) {
-    if(!err) {
+  User.find({ username: username }, function(err, user) {
+    if (!err) {
       res.send(user);
     } else {
       res.sendStatus(404);
@@ -90,7 +90,7 @@ var getByUsername = function(req,res){
 // @route POST api/user/register
 // @desc Register user
 // @access Public
-var register = function(req,res){
+var register = function(req, res) {
   // Form validation
   const { errors, isValid } = validateRegisterInput(req.body);
 
@@ -133,9 +133,9 @@ var register = function(req,res){
       if (err) throw err;
       newUser.password = hash;
       newUser
-      .save()
-      .then(user => res.json(user))
-      .catch(err => console.log(err));
+        .save()
+        .then(user => res.json(user))
+        .catch(err => console.log(err));
     });
   });
 };
@@ -143,8 +143,7 @@ var register = function(req,res){
 // @route POST api/users/login
 // @desc Login user and return JWT token
 // @access Public
-var login = function(req,res){
-
+var login = function(req, res) {
   // Form validation
   const { errors, isValid } = validateLoginInput(req.body);
 
@@ -157,96 +156,98 @@ var login = function(req,res){
   const password = req.body.password;
 
   // Find user by email
-  User.findOne({ $or: [{email: idOrEmail},{username: idOrEmail}] }).then(user => {
-
-    // Check if user exists
-    if (!user) {
-      return res.status(404).json({ emailnotfound: "Email not found" });
-    }
-
-    // Check password
-    bcrypt.compare(password, user.password).then(isMatch => {
-      if (isMatch) {
-        // User matched
-        // Create JWT Payload
-        const payload = {
-          id: user.id,
-          name: user.name
-        };
-        // Sign token
-        jwt.sign(
-          payload,
-          secretOrKey,
-          {
-            expiresIn: 31556926 // 1 year in seconds
-          },
-          (err, token) => {
-            res.json({
-              success: true,
-              token: "Bearer " + token
-            });
-          }
-        );
-      } else {
-        return res
-        .status(400)
-        .json({ passwordincorrect: "Password incorrect" });
+  User.findOne({ $or: [{ email: idOrEmail }, { username: idOrEmail }] }).then(
+    user => {
+      // Check if user exists
+      if (!user) {
+        return res.status(404).json({ emailnotfound: "Email not found" });
       }
-    });
-  });
+
+      // Check password
+      bcrypt.compare(password, user.password).then(isMatch => {
+        if (isMatch) {
+          // User matched
+          // Create JWT Payload
+          const payload = {
+            id: user.id,
+            name: user.name
+          };
+          // Sign token
+          jwt.sign(
+            payload,
+            secretOrKey,
+            {
+              expiresIn: 31556926 // 1 year in seconds
+            },
+            (err, token) => {
+              res.json({
+                success: true,
+                token: "Bearer " + token
+              });
+            }
+          );
+        } else {
+          return res
+            .status(400)
+            .json({ passwordincorrect: "Password incorrect" });
+        }
+      });
+    }
+  );
 };
 
 // delete all unprotected users
-var deleteAll = function(req,res) {
-  User.find({ protected: { $ne: true } }, function(err, unprotectedUsers){
-    if(!err) {
-      unprotectedUsers.forEach(function(user){
+var deleteAll = function(req, res) {
+  User.find({ protected: { $ne: true } }, function(err, unprotectedUsers) {
+    if (!err) {
+      unprotectedUsers.forEach(function(user) {
         var userId = user._id;
         User.findByIdAndDelete(userId, function(err) {
-          if(!err) {
-            console.log(userId + " deleted.")
-          } else{
+          if (!err) {
+            console.log(userId + " deleted.");
+          } else {
             res.sendStatus(404);
           }
-        })
+        });
       });
-      res.send("completed!")
-    } else{
+      res.send("completed!");
+    } else {
       res.status(500);
     }
   });
-}
+};
 
-var getAllGroups = function (req,res) {
+var getAllGroups = function(req, res) {
   var userId = req.params.id;
-  User.findById(userId).lean().exec(function(err, user){
-    if (!err) {
-      var groupDetails = user.groups;
-      var groupIds = groupDetails.map(x => x.groupId);
-      
-      Group.find({_id:{$in:groupIds}}, function (err, groups) {
-        if (!err) {
-          groupDetails.forEach(function(groupDetail) {
-            groups.forEach(function(group) {
-              if (groupDetail.groupId == group._id) {
-                groupDetail.details = group;
-              }
-            });
-          });
-          res.send(groupDetails);
-        } else {
-          res.status(404).send("No groups found.");
-        }
-      });
+  User.findById(userId)
+    .lean()
+    .exec(function(err, user) {
+      if (!err) {
+        var groupDetails = user.groups;
+        var groupIds = groupDetails.map(x => x.groupId);
 
-    } else {
-      res.status(404).send("User not found.")
-    }
-  });
-}
+        Group.find({ _id: { $in: groupIds } }, function(err, groups) {
+          if (!err) {
+            groupDetails.forEach(function(groupDetail) {
+              groups.forEach(function(group) {
+                if (groupDetail.groupId == group._id) {
+                  groupDetail.details = group;
+                }
+              });
+            });
+            res.send(groupDetails);
+          } else {
+            res.status(404).send("No groups found.");
+          }
+        });
+      } else {
+        res.status(404).send("User not found.");
+      }
+    });
+};
 
 // post a comment about a user
-var postComment = function(req,res) {
+var postComment = function(req, res) {
   var posterId = req.params.posterId;
   var postedOnId = req.params.postedOnId;
 
@@ -259,17 +260,17 @@ var postComment = function(req,res) {
   });
 
   // send it to database
-  comment.save(function (err, newComment) {
-    if(!err){
+  comment.save(function(err, newComment) {
+    if (!err) {
       res.send(newComment);
-    }else{
+    } else {
       res.status(400).send(err);
     }
   });
-}
+};
 
 // get all comments about this user
-var getAllComments = function(req,res) {
+var getAllComments = function(req, res) {
   var userId = req.params.id;
 
   function addPoster(comment) {
@@ -287,34 +288,49 @@ var getAllComments = function(req,res) {
     });
   }
 
-  async function addAllPosters(comments){
+  async function addAllPosters(comments) {
     const promises = comments.map(addPoster);
     await Promise.all(promises);
   }
 
-  Comment.find({postedOnId:userId}, function(err, comments){
-    if(!err) {
-      addAllPosters(comments).then(function(){
+  Comment.find({ postedOnId: userId }, function(err, comments) {
+    if (!err) {
+      addAllPosters(comments).then(function() {
         res.send(comments);
       });
-    } else{
+    } else {
       res.status(404);
     }
   });
-}
+};
 
 // get a user by email/username
-var getByUniqueId = function(req,res) {
+var getByUniqueId = function(req, res) {
   const idOrEmail = req.body.idOrEmail;
 
-  User.findOne({ $or: [{email: idOrEmail},{username: idOrEmail}] }, function(err, user){
-    if (!err && user) {
-      res.send(user);
+  User.findOne(
+    { $or: [{ email: idOrEmail }, { username: idOrEmail }] },
+    function(err, user) {
+      if (!err && user) {
+        res.send(user);
+      } else {
+        res.status(404).send("User not found.");
+      }
+    }
+  );
+};
+
+var userSearch = function(req, res) {
+  var searchTerms = req.body.searchTerms;
+
+  User.find({ $text: { $search: searchTerms } }, function(err, results) {
+    if (!err && results) {
+      res.send(results);
     } else {
-      res.status(404).send("User not found.");
+      res.status(404).send("No users found.");
     }
   });
-}
+};
 
 module.exports = {
   getAll,
@@ -329,5 +345,6 @@ module.exports = {
   getAllGroups,
   postComment,
   getAllComments,
-  getByUniqueId
-}
+  getByUniqueId,
+  userSearch
+};

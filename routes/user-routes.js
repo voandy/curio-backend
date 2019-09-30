@@ -31,5 +31,7 @@ router.get('/user/idOrEmail/:idOrEmail', userCont.getByUniqueId);
 router.post("/user/posterId/:posterId/postedOnId/:postedOnId", userCont.postComment);
 // get all comments about this user
 router.get('/user/id/:id/comments', userCont.getAllComments);
+// serch for users by search terms
+router.put('/user/search', userCont.userSearch);
 
 module.exports = router;
