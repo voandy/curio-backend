@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // load Group model
 const Group = mongoose.model("Group");
@@ -10,7 +10,7 @@ const Artefact = mongoose.model("Artefact");
 const Comment = mongoose.model("Comment");
 
 // get all groups
-var getAll = function(req,res){
+var getAll = function(req, res) {
   Group.find(function(err, groups) {
     if (!err) {
       res.send(groups);
@@ -21,9 +21,9 @@ var getAll = function(req,res){
 };
 
 // get group by id
-var getById = function(req,res){
+var getById = function(req, res) {
   var groupId = req.params.id;
-  Group.findById(groupId, function(err, group){
+  Group.findById(groupId, function(err, group) {
     if (!err && group) {
       res.send(group);
     } else {
@@ -35,25 +35,23 @@ var getById = function(req,res){
 // delete the all references to this group from it's members
 function removeFromMembers(groupId) {
   return new Promise(resolve => {
-
-    Group.findById(groupId, function(err, group){
+    Group.findById(groupId, function(err, group) {
       if (!err && group) {
         memberDetails = group.members;
         var memberIds = memberDetails.map(x => x.memberId);
-        
-        User.find({_id:{$in:memberIds}}, function (err, members) {
+
+        User.find({ _id: { $in: memberIds } }, function(err, members) {
           if (!err) {
-            members.forEach(function(member){
+            members.forEach(function(member) {
               groups = member.groups;
 
-              for(var i = 0; i < groups.length; i++){ 
+              for (var i = 0; i < groups.length; i++) {
                 if (groups[i].groupId == groupId) {
                   groups.splice(i, 1);
                   member.save();
                   break;
                 }
               }
-
             });
             resolve();
           } else {
@@ -69,28 +67,31 @@ function removeFromMembers(groupId) {
 }
 
 // delete group by id
-var deleteById = function (req,res) {
+var deleteById = function(req, res) {
   var groupId = req.params.id;
 
   // delete references to the group in users then delete the group
-  removeFromMembers(groupId).then(function () {
-    Group.findByIdAndDelete(groupId, function(err) {
-      if(!err) {
-        res.send(groupId + " deleted.");
-      } else {
-        res.status(500).send(err);
-      }
-    });
-  }, function(error){
-    res.send(error);
-  });
+  removeFromMembers(groupId).then(
+    function() {
+      Group.findByIdAndDelete(groupId, function(err) {
+        if (!err) {
+          res.send(groupId + " deleted.");
+        } else {
+          res.status(500).send(err);
+        }
+      });
+    },
+    function(error) {
+      res.send(error);
+    }
+  );
 };
 
 // update group by id
-var updateById = function(req,res){
+var updateById = function(req, res) {
   var groupId = req.params.id;
   Group.findByIdAndUpdate(groupId, req.body, function(err, group) {
-    if(!err) {
+    if (!err) {
       res.send(group);
     } else {
       res.sendStatus(404);
@@ -99,7 +100,7 @@ var updateById = function(req,res){
 };
 
 // create group
-var create = function (req,res) {
+var create = function(req, res) {
   // create the group
   var group = new Group({
     adminId: req.body.adminId,
@@ -109,8 +110,8 @@ var create = function (req,res) {
 
     dateCreated: new Date(),
 
-    artefacts:[],
-    members:[],
+    artefacts: [],
+    members: [],
 
     likes: [],
 
@@ -129,26 +130,26 @@ var create = function (req,res) {
   }
 
   // send it to database
-  group.save(function (err, newGroup) {
-    if(!err){
+  group.save(function(err, newGroup) {
+    if (!err) {
       res.send(newGroup);
-    }else{
+    } else {
       res.status(400).send(err);
     }
   });
-}
+};
 
 // given an artefactId and groupId adds the artefact to the group
-var addArtefact = function (req,res) {
+var addArtefact = function(req, res) {
   var groupId = req.params.id;
   var artefactId = req.params.artefactId;
 
   var newArtefact = {
     artefactId: artefactId,
     dateAdded: new Date()
-  }
+  };
 
-  Group.findById(groupId, function(err, group){
+  Group.findById(groupId, function(err, group) {
     if (!err && group) {
       // push new artefact to group.artefacts array
       var artefacts = group.artefacts;
@@ -161,20 +162,20 @@ var addArtefact = function (req,res) {
         group.save();
         res.send(group);
       } else {
-        res.status(500).send("Artefact is already listed in this group.")
+        res.status(500).send("Artefact is already listed in this group.");
       }
     } else {
       res.sendStatus(404);
     }
   });
-}
+};
 
 // given an artefactId and groupId removes the artefact from the group
-var removeArtefact = function (req,res) {
+var removeArtefact = function(req, res) {
   var groupId = req.params.id;
   var artefactId = req.params.artefactId;
 
-  Group.findById(groupId, function(err, group){
+  Group.findById(groupId, function(err, group) {
     if (!err && group) {
       var artefacts = group.artefacts;
       var index = artefacts.findIndex(x => x.artefactId == artefactId);
@@ -185,18 +186,16 @@ var removeArtefact = function (req,res) {
         group.save();
         res.send(group);
       } else {
-        res.status(404).send("Artefact not found in group.artefacts array.")
+        res.status(404).send("Artefact not found in group.artefacts array.");
       }
-
     } else {
-      res.status(404).send("Group not found.")
+      res.status(404).send("Group not found.");
     }
   });
-}
-
+};
 
 // given a userId adds that user as a member of the group
-var addMember = function (req,res) {
+var addMember = function(req, res) {
   var groupId = req.params.id;
   var memberId = req.params.userId;
 
@@ -208,9 +207,9 @@ var addMember = function (req,res) {
       var newMember = {
         memberId: memberId,
         dateAdded: new Date()
-      }
-    
-      Group.findById(groupId, function(err, group){
+      };
+
+      Group.findById(groupId, function(err, group) {
         if (!err && group) {
           // add new member to group.members array
           var members = group.members;
@@ -233,9 +232,9 @@ var addMember = function (req,res) {
         groupId: groupId,
         dateJoined: new Date(),
         pinned: false
-      }
+      };
 
-      User.findById(memberId, function(err, member){
+      User.findById(memberId, function(err, member) {
         if (!err && member) {
           // add groupId to member's groups
           var groups = member.groups;
@@ -253,7 +252,7 @@ var addMember = function (req,res) {
 
   async function addToBoth() {
     await Promise.all([addToGroup(), addToUser()]);
-  
+
     if (status) {
       res.status(404).send(status);
     } else {
@@ -262,7 +261,7 @@ var addMember = function (req,res) {
   }
 
   // check if user is already a member of the group before adding.
-  Group.findById(groupId, function(err, group){
+  Group.findById(groupId, function(err, group) {
     if (!err && group) {
       var members = group.members;
       var index = members.findIndex(x => x.memberId == memberId);
@@ -277,11 +276,10 @@ var addMember = function (req,res) {
       resolve();
     }
   });
-  
-}
+};
 
 // given a userId removes that user from the group
-var removeMember = function (req,res) {
+var removeMember = function(req, res) {
   var groupId = req.params.id;
   var memberId = req.params.userId;
 
@@ -290,12 +288,12 @@ var removeMember = function (req,res) {
 
   function removeFromGroup() {
     return new Promise(resolve => {
-      Group.findById(groupId, function(err, group){
+      Group.findById(groupId, function(err, group) {
         if (!err && group) {
           // remove member from group.members
           var members = group.members;
           var index = members.findIndex(x => x.memberId == memberId);
-    
+
           if (index >= 0) {
             members.splice(index, 1);
             group.members = members;
@@ -305,8 +303,7 @@ var removeMember = function (req,res) {
           } else {
             status = "Member not found in group.members array.";
             resolve();
-          } 
-    
+          }
         } else {
           status = "Group not found.";
           resolve();
@@ -317,12 +314,12 @@ var removeMember = function (req,res) {
 
   function removeFromUser() {
     return new Promise(resolve => {
-      User.findById(memberId, function(err, member){
+      User.findById(memberId, function(err, member) {
         if (!err && member) {
           // add groupId to member's groups
           var groups = member.groups;
           var index = groups.findIndex(x => x.groupId == groupId);
-          
+
           if (index >= 0) {
             groups.splice(index, 1);
             member.groups = groups;
@@ -332,7 +329,6 @@ var removeMember = function (req,res) {
             status = "Group not found in user.groups array.";
             resolve();
           }
-    
         } else {
           status = "User not found.";
           resolve();
@@ -343,7 +339,7 @@ var removeMember = function (req,res) {
 
   async function removeFromBoth() {
     await Promise.all([removeFromGroup(), removeFromUser()]);
-  
+
     if (status) {
       res.status(404).send(status);
     } else {
@@ -352,97 +348,129 @@ var removeMember = function (req,res) {
   }
 
   removeFromBoth();
-}
+};
 
 // give a groupId returns an object containing all the artefacts in that group
-var getAllArtefacts = function (req,res) {
+var getAllArtefacts = function(req, res) {
   var groupId = req.params.id;
-  Group.findById(groupId).lean().exec(function(err, group){
-    if (!err && group) {
-      artefactDetails = group.artefacts;
-      var artefactIds = artefactDetails.map(x => x.artefactId);
-      
-      Artefact.find({_id:{$in:artefactIds}}, function (err, artefacts) {
+
+  function addUserDetails(artefact) {
+    return new Promise((resolve, reject) => {
+      userId = artefact.details.userId;
+      User.findById(userId, function(err, user) {
         if (!err) {
-          artefactDetails.forEach(function(artefactDetail) {
-            artefacts.forEach(function(artefact) {
-              if(artefactDetail.artefactId == artefact._id) {
-                artefactDetail.details = artefact;
-              }
-            });
-          });
-          res.send(artefactDetails);
+          artefact.user = user;
+          resolve(artefact);
         } else {
-          res.status(404).send("No artefacts found.");
+          reject(err);
         }
       });
+    });
+  }
 
-    } else {
-      res.status(404).send("Group not found.")
-    }
-  });
-}
+  async function addAllUserDetails(artefacts){
+    const promises = artefacts.map(addUserDetails);
+    await Promise.all(promises);
+  }
+
+  Group.findById(groupId)
+    .lean()
+    .exec(function(err, group) {
+      if (!err && group) {
+        artefactDetails = group.artefacts;
+        var artefactIds = artefactDetails.map(x => x.artefactId);
+
+        Artefact.find({ _id: { $in: artefactIds } }, function(err, artefacts) {
+          if (!err) {
+            // attach details to artefacts
+            artefactDetails.forEach(function(artefactDetail) {
+              artefacts.forEach(function(artefact) {
+                if (artefactDetail.artefactId == artefact._id) {
+                  artefactDetail.details = artefact;
+                }
+              });
+            });
+
+            // attach user data to artefacts
+            addAllUserDetails(artefactDetails).then(() => {
+              res.send(artefactDetails);
+            }).catch(() => {
+              res.status(500).send("Unable to attach user details.");
+            });
+          } else {
+            res.status(404).send("No artefacts found.");
+          }
+        });
+      } else {
+        res.status(404).send("Group not found.");
+      }
+    });
+};
 
 // get all the members in a group
-var getAllMembers = function (req,res) {
+var getAllMembers = function(req, res) {
   var groupId = req.params.id;
-  Group.findById(groupId).lean().exec(function(err, group){
-    if (!err && group) {
-      memberDetails = group.members;
-      var memberIds = memberDetails.map(x => x.memberId);
-      
-      User.find({_id:{$in:memberIds}}, function (err, members) {
-        if (!err) {
-          memberDetails.forEach(function(memberDetail) {
-            members.forEach(function(member) {
-              if (memberDetail.memberId == member._id) {
-                memberDetail.details = member;
-              }
-            });
-          });
-          res.send(memberDetails);
-        } else {
-          res.status(404).send("No members found.");
-        }
-      });
+  Group.findById(groupId)
+    .lean()
+    .exec(function(err, group) {
+      if (!err && group) {
+        memberDetails = group.members;
+        var memberIds = memberDetails.map(x => x.memberId);
 
-    } else {
-      res.status(404).send("Group not found.")
-    }
-  });
-}
+        User.find({ _id: { $in: memberIds } }, function(err, members) {
+          if (!err) {
+            memberDetails.forEach(function(memberDetail) {
+              members.forEach(function(member) {
+                if (memberDetail.memberId == member._id) {
+                  memberDetail.details = member;
+                }
+              });
+            });
+            res.send(memberDetails);
+          } else {
+            res.status(404).send("No members found.");
+          }
+        });
+      } else {
+        res.status(404).send("Group not found.");
+      }
+    });
+};
 
 // delete all unprotected groups
 var deleteAll = function(req, res) {
-  var removeFromAllMembers = async (unprotectedGroups) => {
+  var removeFromAllMembers = async unprotectedGroups => {
     for (var group of unprotectedGroups) {
-     await removeFromMembers(group._id);
+      await removeFromMembers(group._id);
     }
-  }
-  
-  Group.find({ protected: { $ne: true } }, function(err, unprotectedGroups){
-    if(!err) {
-      removeFromAllMembers(unprotectedGroups).then(function () {
-        unprotectedGroups.forEach(function(group) {
-          groupId = group._id;
+  };
 
-          Group.findByIdAndDelete(groupId, function(err) {
-            if(err) {
-              res.status(500).send("Unable to delete all groups.");
-            }
+  Group.find({ protected: { $ne: true } }, function(err, unprotectedGroups) {
+    if (!err) {
+      removeFromAllMembers(unprotectedGroups).then(
+        function() {
+          unprotectedGroups.forEach(function(group) {
+            groupId = group._id;
+
+            Group.findByIdAndDelete(groupId, function(err) {
+              if (err) {
+                res.status(500).send("Unable to delete all groups.");
+              }
+            });
           });
-        });
-        res.send("Completed!");
-      }, function (error) {
-        res.send(error);
-      });
+          res.send("Completed!");
+        },
+        function(error) {
+          res.send(error);
+        }
+      );
     } else {
       res.status(500);
     }
   });
-}
+};
 
-var postComment = function(req,res) {
+var postComment = function(req, res) {
   var groupId = req.params.id;
   var userId = req.params.userId;
 
@@ -455,16 +483,16 @@ var postComment = function(req,res) {
   });
 
   // send it to database
-  comment.save(function (err, newComment) {
-    if(!err){
+  comment.save(function(err, newComment) {
+    if (!err) {
       res.send(newComment);
-    }else{
+    } else {
       res.status(400).send(err);
     }
   });
-}
+};
 
-var getAllComments = function(req,res) {
+var getAllComments = function(req, res) {
   var groupId = req.params.id;
 
   function addPoster(comment) {
@@ -482,27 +510,27 @@ var getAllComments = function(req,res) {
     });
   }
 
-  async function addAllPosters(comments){
+  async function addAllPosters(comments) {
     const promises = comments.map(addPoster);
     await Promise.all(promises);
   }
 
-  Comment.find({postedOnId:groupId}, function(err, comments){
-    if(!err) {
-      addAllPosters(comments).then(function(){
+  Comment.find({ postedOnId: groupId }, function(err, comments) {
+    if (!err) {
+      addAllPosters(comments).then(function() {
         res.send(comments);
       });
-    } else{
+    } else {
       res.status(404);
     }
   });
-}
+};
 
 // like the group
-var like = function(req,res) {
+var like = function(req, res) {
   var groupId = req.params.id;
   var userId = req.params.userId;
-  Group.findById(groupId, function(err, group){
+  Group.findById(groupId, function(err, group) {
     if (!err) {
       likes = group.likes;
       var index = likes.indexOf(userId);
@@ -519,13 +547,13 @@ var like = function(req,res) {
       res.status(404).send("Group not found.");
     }
   });
-}
+};
 
 // unlike the group
-var unlike = function(req,res) {
+var unlike = function(req, res) {
   var groupId = req.params.id;
   var userId = req.params.userId;
-  Group.findById(groupId, function(err, group){
+  Group.findById(groupId, function(err, group) {
     if (!err) {
       likes = group.likes;
 
@@ -543,28 +571,27 @@ var unlike = function(req,res) {
       res.status(404).send("Group not found.");
     }
   });
-}
+};
 
 // returns all users who like this artefact
-var getLikedUsers = function(req,res) {
+var getLikedUsers = function(req, res) {
   var groupId = req.params.id;
-  Group.findById(groupId, function(err, group){
+  Group.findById(groupId, function(err, group) {
     if (!err) {
       likes = group.likes;
-      
-      User.find({_id:{$in:likes}}, function (err, users) {
+
+      User.find({ _id: { $in: likes } }, function(err, users) {
         if (!err) {
           res.send(users);
         } else {
           res.status(404).send("No users found.");
         }
       });
-
     } else {
-      res.status(404).send("Artefact not found.")
+      res.status(404).send("Artefact not found.");
     }
   });
-}
+};
 
 var groupSearch = function(req, res) {
   var searchTerms = req.body.searchTerms;
@@ -597,4 +624,4 @@ module.exports = {
   unlike,
   getLikedUsers,
   groupSearch
-}
+};
