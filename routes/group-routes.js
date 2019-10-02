@@ -39,5 +39,13 @@ router.post('/group/id/:id/userId/:userId/like', groupCont.like);
 router.post('/group/id/:id/userId/:userId/unlike', groupCont.unlike);
 // serch for groups by search terms
 router.put('/group/search', groupCont.groupSearch);
+// invite a user to join group
+router.put('/group/id/:id/userId/:userId/invite', groupCont.inviteUser);
+// remove an invitation
+router.put('/group/id/:id/userId/:userId/remove-invite', groupCont.removetInvitation);
+// invite a user to join group
+router.put('/group/id/:id/userId/:userId/request', groupCont.joinRequest);
+// remove an invitation
+router.put('/group/id/:id/userId/:userId/remove-request', groupCont.removeJoinRequest);
 
 module.exports = router;

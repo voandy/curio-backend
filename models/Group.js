@@ -32,6 +32,12 @@ const groupSchema = new Schema({
   // list of user ids who've liked
   likes: [String],
 
+  // list of users who have been invited to join a group
+  pendingInvitations: [String],
+
+  // list of users who have requested to join a private grou
+  pendingRequests: [String],
+
   // privacy: 0 = public, 1 = private
   privacy: { type: Number, default: Date.now },
 

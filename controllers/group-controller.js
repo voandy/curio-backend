@@ -115,6 +115,9 @@ var create = function(req, res) {
 
     likes: [],
 
+    pendingInvitations: [],
+    pendingRequests: [],
+
     protected: false
   });
 
@@ -607,6 +610,108 @@ var groupSearch = function(req, res) {
   });
 };
 
+// invite user to group
+var inviteUser = function(req, res) {
+  var groupId = req.params.id;
+  var userId = req.params.userId;
+
+  Group.findById(groupId, function(err, group) {
+    if (!err && group) {
+      var pendingInvitations = group.pendingInvitations;
+
+      var index = pendingInvitations.indexOf(userId);
+
+      if (index < 0) {
+        pendingInvitations.push(userId);
+        group.pendingInvitations = pendingInvitations;
+        group.save();
+        res.send(group);
+      } else {
+        res.send(500).status("User has pending invitation");
+      }
+
+    } else {
+      res.send(404).status("Group not found");
+    }
+  });
+};
+
+// remove invitation
+var removetInvitation = function(req, res) {
+  var groupId = req.params.id;
+  var userId = req.params.userId;
+
+  Group.findById(groupId, function(err, group) {
+    if (!err && group) {
+      var pendingInvitations = group.pendingInvitations;
+
+      var index = pendingInvitations.indexOf(userId);
+
+      if (index >= 0) {
+        pendingInvitations.splice(index, 1);
+        group.pendingInvitations = pendingInvitations;
+        group.save();
+        res.send(group);
+      } else {
+        res.send(500).status("User doesn't have an invitation");
+      }
+    } else {
+      res.send(404).status("Group not found");
+    }
+  });
+};
+
+// request to join group
+var joinRequest = function(req, res) {
+  var groupId = req.params.id;
+  var userId = req.params.userId;
+
+  Group.findById(groupId, function(err, group) {
+    if (!err && group) {
+      var pendingRequests = group.pendingRequests;
+
+      var index = pendingRequests.indexOf(userId);
+
+      if (index < 0) {
+        pendingRequests.push(userId);
+        group.pendingRequests = pendingRequests;
+        group.save();
+        res.send(group);
+      } else {
+        res.send(500).status("User already has a join request");
+      }
+    } else {
+      res.sendStatus(404);
+    }
+  });
+};
+
+// remove invitation
+var removeJoinRequest = function(req, res) {
+  var groupId = req.params.id;
+  var userId = req.params.userId;
+
+  Group.findById(groupId, function(err, group) {
+    if (!err && group) {
+      var pendingRequests = group.pendingRequests;
+
+      var index = pendingRequests.indexOf(userId);
+
+      if (index >= 0) {
+        pendingRequests.splice(index, 1);
+        group.pendingRequests = pendingRequests;
+        group.save();
+        res.send(group);
+      } else {
+        res.send(500).status("User doesn't have an request");
+      }
+    } else {
+      res.send(404).status("Group not found");
+    }
+  });
+};
+
+
 module.exports = {
   getAll,
   getById,
@@ -625,5 +730,9 @@ module.exports = {
   like,
   unlike,
   getLikedUsers,
-  groupSearch
+  groupSearch,
+  inviteUser,
+  removetInvitation,
+  joinRequest,
+  removeJoinRequest
 };
