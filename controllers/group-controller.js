@@ -371,9 +371,24 @@ var getAllArtefacts = function(req, res) {
     });
   }
 
+  function addCommentCount(artefact) {
+    return new Promise((resolve, reject) => {
+      var artefactId = artefact.details._id;
+      Comment.find({ postedOnId: artefactId }, function(err, comments) {
+        if (!err && comments) {
+          artefact.commentCount = comments.length;
+          resolve(artefact);
+        } else {
+          reject(err);
+        }
+      });
+    });
+  }
+
   async function addAllUserDetails(artefacts){
-    const promises = artefacts.map(addUserDetails);
-    await Promise.all(promises);
+    const userPromises = artefacts.map(addUserDetails);
+    const commentPromises = artefacts.map(addCommentCount);
+    await Promise.all(userPromises, commentPromises);
   }
 
   Group.findById(groupId)
