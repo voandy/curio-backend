@@ -295,11 +295,13 @@ var getAllComments = function(req, res) {
 
   Comment.find({ postedOnId: userId }, function(err, comments) {
     if (!err) {
-      addAllPosters(comments).then(function() {
-        res.send(comments);
-      }).catch(function(){
-        res.status(500);
-      });
+      addAllPosters(comments)
+        .then(function() {
+          res.send(comments);
+        })
+        .catch(function() {
+          res.status(500);
+        });
     } else {
       res.status(404);
     }
@@ -334,6 +336,51 @@ var userSearch = function(req, res) {
   });
 };
 
+// set pinned value to true for target group in user's groups
+var pinGroup = function(req, res) {
+  var userId = req.params.id;
+  var groupId = req.params.groupId;
+  // use helper to update user's group
+  var err = pinOrUnpinGroupHelper(userId, groupId, true);
+  // response
+  !err ? res.send("okay.") : res.status(404).send(err);
+};
+
+// set pinned value to false for target group in user's groups
+var unpinGroup = function(req, res) {
+  var userId = req.params.id;
+  var groupId = req.params.groupId;
+  // use helper to update user's group
+  var err = pinOrUnpinGroupHelper(userId, groupId, false);
+  // response
+  !err ? res.send("okay.") : res.status(404).send(err);
+};
+
+// helper function to help update user's group value
+var pinOrUnpinGroupHelper = function(userId, groupId, toPin) {
+  // find user by id
+  User.findById(userId, function(err, user) {
+    if (!err) {
+      // extract user's groups
+      var userGroups = user.groups;
+      // modify the target group's pinned value
+      for (group of userGroups) {
+        if (group.groupId == groupId) {
+          group.pinned = toPin;
+          break;
+        }
+      }
+      // update user's group
+      // prettier-ignore
+      User.updateOne({ _id: userId }, { groups: userGroups }, function(err, user) {
+        return (!err) ? false : "User update error.";
+      });
+    } else {
+      return "No users found.";
+    }
+  });
+};
+
 module.exports = {
   getAll,
   getById,
@@ -348,5 +395,7 @@ module.exports = {
   postComment,
   getAllComments,
   getByUniqueId,
-  userSearch
+  userSearch,
+  pinGroup,
+  unpinGroup
 };

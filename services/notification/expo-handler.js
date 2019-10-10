@@ -8,7 +8,7 @@ class ExpoHandler {
   // ensure this is a singleton
   constructor() {
     if (!ExpoHandler.instance) {
-      console.log("ExpoHandler is running!");
+      console.log("Expo-Push-Notfication-Handler is running!");
       // Create a new Expo SDK client
       this.expo = new Expo();
       // initialize required values
