@@ -7,6 +7,8 @@ const Comment = mongoose.model("Comment");
 // load User model
 const User = mongoose.model("User");
 
+const Group = mongoose.model("Group");
+
 const trigger = require("../services/notification/triggers");
 
 // get all artefacts
@@ -23,21 +25,39 @@ var getAll = function(req, res) {
 // get artefact by id
 var getById = function(req, res) {
   var artefactId = req.params.id;
-  Artefact.findById(artefactId).lean().exec(function(err, artefact) {
-    if (!err && artefact) {
-      res.send(artefact);
-    } else {
-      res.sendStatus(404);
-    }
-  });
+  Artefact.findById(artefactId)
+    .lean()
+    .exec(function(err, artefact) {
+      if (!err && artefact) {
+        res.send(artefact);
+      } else {
+        res.sendStatus(404);
+      }
+    });
 };
 
 // delete artefact by id
 var deleteById = function(req, res) {
   var artefactId = req.params.id;
+  // try to find the group that's associated with the artefact
+  //prettier-ignore
+  Group.findOne({artefacts: { $elemMatch: { artefactId }}}, function(err, group) {
+    if (!err) {
+      // such group exist, therefore remove the association
+      if (group) {
+        group.artefacts = group.artefacts.filter(
+          x => x.artefactId !== artefactId
+        );
+        group.save();
+      }
+    } else {
+      res.sendStatus(404);
+    }
+  });
+  // find and delete artefact by id
   Artefact.findByIdAndDelete(artefactId, function(err, artefact) {
     if (!err) {
-      res.send(artefactId + "is deleted");
+      res.send(artefactId + " is deleted");
     } else {
       res.sendStatus(404);
     }
@@ -300,22 +320,26 @@ var getAllComments = function(req, res) {
     });
   }
 
-  async function addAllPosters(comments){
+  async function addAllPosters(comments) {
     const promises = comments.map(addPoster);
     await Promise.all(promises);
   }
 
-  Comment.find({ postedOnId: artefactId }).lean().exec(function(err, comments) {
-    if (!err && comments) {
-      addAllPosters(comments).then(function(){
-        res.send(comments);
-      }).catch(function(){
-        res.status(500);
-      });
-    } else {
-      res.status(404);
-    }
-  });
+  Comment.find({ postedOnId: artefactId })
+    .lean()
+    .exec(function(err, comments) {
+      if (!err && comments) {
+        addAllPosters(comments)
+          .then(function() {
+            res.send(comments);
+          })
+          .catch(function() {
+            res.status(500);
+          });
+      } else {
+        res.status(404);
+      }
+    });
 };
 
 module.exports = {
