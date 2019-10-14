@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const notificationSchema = new Schema({
   userId: { type: String, required: true },
-  userPushToken: { type: String, required: true },
+  userPushToken: { type: String, default: "" },
 
   datePosted: { type: Date, default: Date.now },
   data: String,

@@ -9,7 +9,7 @@ const User = mongoose.model("User");
 
 const Group = mongoose.model("Group");
 
-const trigger = require("../services/notification/triggers");
+const triggers = require("../services/notification/triggers");
 
 // get all artefacts
 var getAll = function(req, res) {
@@ -41,7 +41,7 @@ var deleteById = function(req, res) {
   var artefactId = req.params.id;
   // try to find the group that's associated with the artefact
   //prettier-ignore
-  Group.findOne({artefacts: { $elemMatch: { artefactId }}}, function(err, group) {
+  Group.findOne({ artefacts: { $elemMatch: { artefactId }}}, function(err, group) {
     if (!err) {
       // such group exist, therefore remove the association
       if (group) {
@@ -57,6 +57,9 @@ var deleteById = function(req, res) {
   // find and delete artefact by id
   Artefact.findByIdAndDelete(artefactId, function(err, artefact) {
     if (!err) {
+      // delete all associated notifications
+      triggers.deleteAllArtefactNotif(artefactId);
+      // response
       res.send(artefactId + " is deleted");
     } else {
       res.sendStatus(404);
@@ -159,7 +162,7 @@ var like = function(req, res) {
         artefact.save();
         res.send(artefact);
         // trigger notification
-        trigger.triggerArtefactNotification(artefactId, userId);
+        triggers.triggerArtefactNotif(artefactId, userId);
         // other user has already liked the artefact
       } else {
         res.status(400).send("User already liked this artefact");

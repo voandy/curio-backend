@@ -47,7 +47,7 @@ class ExpoHandler {
           const pushToken = notif.userPushToken;
           // Check that the notification contains an user push token 
           if (!pushToken) {
-            console.error(`Push token not found for the user: ${notif.userId}`);
+            console.error(`Push token not found, user: ${notif.userId}, notif_id: ${notif._id}`);
             continue;
           }
           // Check that each notification contains a valid push token
