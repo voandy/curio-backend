@@ -726,7 +726,6 @@ var removeJoinRequest = function(req, res) {
   });
 };
 
-
 module.exports = {
   getAll,
   getById,

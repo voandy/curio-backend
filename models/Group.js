@@ -39,7 +39,7 @@ const groupSchema = new Schema({
   pendingRequests: [String],
 
   // privacy: 0 = public, 1 = private
-  privacy: { type: Number, default: Date.now },
+  privacy: { type: Number, default: 0 },
 
   protected: { type: Boolean, default: false }
 });
