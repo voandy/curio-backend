@@ -12,8 +12,7 @@ class ExpoHandler {
       // Create a new Expo SDK client
       this.expo = new Expo();
       // initialize required values
-      this.unsentNotif = [];
-      this.previousUnsentNotif = [];
+      this.unsentNotifications = [];
       // set singleton reference to this
       ExpoHandler.instance = this;
     }
@@ -23,26 +22,25 @@ class ExpoHandler {
   // takes in a new notification and add it to the unsent
   // notifications array to be processed
   addUnsentNotification(notification) {
-    this.unsentNotif.push(notification);
+    this.unsentNotifications.push(notification);
   }
 
   // delete all elements in the arrays
   resetAllNotifications() {
-    this.unsentNotif.splice(0, this.unsentNotif.length);
-    this.previousUnsentNotif.splice(0, this.previousUnsentNotif.length);
+    this.unsentNotifications.splice(0, this.unsentNotifications.length);
   }
 
   // takes in and processes notifications to transform
   // them into messages to be sent to Expo server
   //prettier-ignore
-  createMessages() {
+  createMessages(notifications) {
     return new Promise((resolve, reject) => {
       let messages = [];
       try {
         // process all notifications
-        for (let notif of this.unsentNotif) {
+        for (let notif of notifications) {
           // extract data string and transform them into json object
-          let data = JSON.parse(notif.data);
+          let data = notif.data;
           // extract user push token
           const pushToken = notif.userPushToken;
           // Check that the notification contains an user push token 
@@ -61,7 +59,7 @@ class ExpoHandler {
             to: pushToken,
             sound: "default",
             body: data.message,
-            data: data
+            data: JSON.stringify(data)
           });
         }
         resolve(messages);
@@ -179,27 +177,24 @@ class ExpoHandler {
   // it gathers all the new notifications
   run() {
     // check if there's new notifications
-    if (!this.unsentNotif.every(e => this.previousUnsentNotif.includes(e))) {
+    if (this.unsentNotifications.length > 0) {
       console.log("Received one new notification!");
-      console.log(this.unsentNotif);
-      this.previousUnsentNotif.splice(0, this.previousUnsentNotif.length);
-      this.previousUnsentNotif.push(...this.unsentNotif);
+      console.log(this.unsentNotifications);
       // process and send notifications to expo
       // 1st step
-      this.createMessages()
+      this.createMessages(this.unsentNotifications)
         .then(messages => {
           // 2nd step
           this.pushToExpoServer(messages)
-            .then(tickets =>
+            .then(tickets => {
               // 3rd step
-              this.auditTickets(tickets).then(() => {
-                // only reset all notifications for now
-                this.resetAllNotifications();
-              })
-            )
+              this.auditTickets(tickets);
+            })
             .catch(err => console.log(err));
         })
         .catch(err => console.log(err));
+      // only reset all notifications for now
+      this.resetAllNotifications();
     }
     // repeat again in 2 seconds
     setTimeout(() => this.run(), 2000);
