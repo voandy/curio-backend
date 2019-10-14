@@ -8,6 +8,8 @@ const User = mongoose.model("User");
 const Artefact = mongoose.model("Artefact");
 // load comment model
 const Comment = mongoose.model("Comment");
+// notification triggers
+const triggers = require("../services/notification/triggers");
 
 // get all groups
 var getAll = function(req, res) {
@@ -164,6 +166,9 @@ var addArtefact = function(req, res) {
         group.artefacts = artefacts;
         group.save();
         res.send(group);
+
+        // trigger notification
+        triggers.triggerArtefactNotif(artefactId, null, "addNewArtefact");
       } else {
         res.status(500).send("Artefact is already listed in this group.");
       }
@@ -271,6 +276,8 @@ var addMember = function(req, res) {
 
       if (index < 0) {
         addToBoth();
+        // trigger notification
+        triggers.triggerInvitationNotif(groupId, memberId, "accept");
       } else {
         res.status(500).send("User aleady a member of this group.");
       }
@@ -385,7 +392,7 @@ var getAllArtefacts = function(req, res) {
     });
   }
 
-  async function addAllUserDetails(artefacts){
+  async function addAllUserDetails(artefacts) {
     const userPromises = artefacts.map(addUserDetails);
     const commentPromises = artefacts.map(addCommentCount);
     await Promise.all(userPromises, commentPromises);
@@ -410,11 +417,13 @@ var getAllArtefacts = function(req, res) {
             });
 
             // attach user data to artefacts
-            addAllUserDetails(artefactDetails).then(() => {
-              res.send(artefactDetails);
-            }).catch(() => {
-              res.status(500).send("Unable to attach user details.");
-            });
+            addAllUserDetails(artefactDetails)
+              .then(() => {
+                res.send(artefactDetails);
+              })
+              .catch(() => {
+                res.status(500).send("Unable to attach user details.");
+              });
           } else {
             res.status(404).send("No artefacts found.");
           }
@@ -535,11 +544,13 @@ var getAllComments = function(req, res) {
 
   Comment.find({ postedOnId: groupId }, function(err, comments) {
     if (!err) {
-      addAllPosters(comments).then(function() {
-        res.send(comments);
-      }).catch(function(){
-        res.status(500);
-      });
+      addAllPosters(comments)
+        .then(function() {
+          res.send(comments);
+        })
+        .catch(function() {
+          res.status(500);
+        });
     } else {
       res.status(404);
     }
@@ -641,10 +652,11 @@ var inviteUser = function(req, res) {
         group.pendingInvitations = pendingInvitations;
         group.save();
         res.send(group);
+        // trigger notification
+        triggers.triggerInvitationNotif(groupId, userId, "invite");
       } else {
         res.send(500).status("User has pending invitation");
       }
-
     } else {
       res.send(404).status("Group not found");
     }
@@ -652,7 +664,7 @@ var inviteUser = function(req, res) {
 };
 
 // remove invitation
-var removetInvitation = function(req, res) {
+var removeInvitation = function(req, res) {
   var groupId = req.params.id;
   var userId = req.params.userId;
 
@@ -667,6 +679,8 @@ var removetInvitation = function(req, res) {
         group.pendingInvitations = pendingInvitations;
         group.save();
         res.send(group);
+        // trigger notification
+        triggers.deleteInvitationNotif(groupId, userId);
       } else {
         res.send(500).status("User doesn't have an invitation");
       }
@@ -746,7 +760,7 @@ module.exports = {
   getLikedUsers,
   groupSearch,
   inviteUser,
-  removetInvitation,
+  removeInvitation,
   joinRequest,
   removeJoinRequest
 };

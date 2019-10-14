@@ -6,9 +6,9 @@ const Artefact = mongoose.model("Artefact");
 const Comment = mongoose.model("Comment");
 // load User model
 const User = mongoose.model("User");
-
+// load Group model
 const Group = mongoose.model("Group");
-
+// notification triggers
 const triggers = require("../services/notification/triggers");
 
 // get all artefacts
@@ -162,9 +162,9 @@ var like = function(req, res) {
         artefact.save();
         res.send(artefact);
         // trigger notification
-        triggers.triggerArtefactNotif(artefactId, userId);
-        // other user has already liked the artefact
+        triggers.triggerArtefactNotif(artefactId, userId, "like");
       } else {
+        // other user has already liked the artefact
         res.status(400).send("User already liked this artefact");
       }
     } else {
@@ -298,7 +298,7 @@ var postComment = function(req, res) {
     if (!err) {
       res.send(newComment);
       // trigger notification
-      trigger.triggerArtefactNotification(artefactId, userId, newComment);
+      triggers.triggerArtefactNotif(artefactId, userId, "comment");
     } else {
       res.status(400).send(err);
     }
