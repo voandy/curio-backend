@@ -726,6 +726,21 @@ var removeJoinRequest = function(req, res) {
   });
 };
 
+Group.find(function(err, groups) {
+  if (!err) {
+    groups.forEach((group) => {
+      group.pendingInvitations = [];
+      group.pendingRequests = [];
+      group.likes = [];
+      group.privacy = 0;
+      group.save();
+    });
+    console.log("done");
+  } else {
+    res.sendStatus(404);
+  }
+});
+
 
 module.exports = {
   getAll,
