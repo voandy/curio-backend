@@ -276,8 +276,11 @@ var addMember = function(req, res) {
 
       if (index < 0) {
         addToBoth();
+        console.log(group.adminId.toString() !== memberId.toString());
         // trigger notification
-        triggers.triggerInvitationNotif(groupId, memberId, "accept");
+        if (group.adminId.toString() !== memberId.toString()) {
+          triggers.triggerInvitationNotif(groupId, memberId, "accept");
+        }
       } else {
         res.status(500).send("User aleady a member of this group.");
       }
