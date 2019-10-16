@@ -231,9 +231,20 @@ deleteInvitationNotif = function(groupId, userId) {
   );
 };
 
+// delete all notifications associated with the artefact
+//prettier-ignore
+const deleteAllGroupNotif = async function(groupId) {
+  Notification.deleteMany({ refId: groupId }, function(err) {
+    if (err) {
+      console.log("Error deleting all notifications for groups: " + err);
+    }
+  });
+};
+
 module.exports = {
   triggerArtefactNotif,
   deleteAllArtefactNotif,
   triggerInvitationNotif,
-  deleteInvitationNotif
+  deleteInvitationNotif,
+  deleteAllGroupNotif
 };

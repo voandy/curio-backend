@@ -36,7 +36,7 @@ var getById = function(req, res) {
 
 // delete the all references to this group from it's members
 function removeFromMembers(groupId) {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     Group.findById(groupId, function(err, group) {
       if (!err && group) {
         memberDetails = group.members;
@@ -78,6 +78,8 @@ var deleteById = function(req, res) {
       Group.findByIdAndDelete(groupId, function(err) {
         if (!err) {
           res.send(groupId + " deleted.");
+          // delete all associated notifications
+          triggers.deleteAllGroupNotif(groupId);
         } else {
           res.status(500).send(err);
         }
@@ -281,7 +283,7 @@ var addMember = function(req, res) {
           triggers.triggerInvitationNotif(groupId, memberId, "accept");
         }
       } else {
-        res.status(500).send("User aleady a member of this group.");
+        res.status(500).send("User already a member of this group.");
       }
     } else {
       status = "Group not found.";
