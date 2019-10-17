@@ -135,6 +135,26 @@ const sendArtefactNotif = function(artefact, target, artefactActor, artefactOwne
   return;
 };
 
+// delete artefact-liked notifications when the artefact is unliked
+deleteArtefactLikeNotif = function(artefactId, userId) {
+  // find the one notification to delete
+  Notification.deleteOne(
+    {
+      userId,
+      refId: artefactId,
+      category: "artefact",
+      "data.type": "like"
+    },
+    function(err) {
+      if (err) {
+        console.log(
+          "Error deleting all artefact-liked notifications for artefact: " + err
+        );
+      }
+    }
+  );
+};
+
 // delete all notifications associated with the artefact
 //prettier-ignore
 const deleteAllArtefactNotif = async function(artefactId) {
@@ -243,8 +263,9 @@ const deleteAllGroupNotif = async function(groupId) {
 
 module.exports = {
   triggerArtefactNotif,
+  deleteAllGroupNotif,
+  deleteArtefactLikeNotif,
   deleteAllArtefactNotif,
   triggerInvitationNotif,
-  deleteInvitationNotif,
-  deleteAllGroupNotif
+  deleteInvitationNotif
 };

@@ -187,8 +187,10 @@ var unlike = function(req, res) {
         artefact.likes = likes;
         artefact.save();
         res.send(artefact);
-        // user hasn't liked the artefact before
+        // delete previous artefact-liked notification
+        triggers.deleteArtefactLikeNotif(artefactId, userId);
       } else {
+        // user hasn't liked the artefact before
         res.status(404).send("User has not liked this artefact.");
       }
     } else {
