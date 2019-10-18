@@ -219,6 +219,29 @@ var deleteAll = function(req, res) {
 
 var getAllGroups = function(req, res) {
   var userId = req.params.id;
+
+  function addAdmin(groupDetail) {
+    return new Promise((resolve, reject) => {
+      userId = groupDetail.details.adminId;
+      User.findById(userId, function(err, user) {
+        if (!err) {
+          groupDetail.admin = {
+            profilePic: user.profilePic,
+            name: user.name
+          };
+          resolve(groupDetail);
+        } else {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  async function addAllAdmins(groupDetails) {
+    const promises = groupDetails.map(addAdmin);
+    await Promise.all(promises);
+  }
+
   User.findById(userId)
     .lean()
     .exec(function(err, user) {
@@ -226,20 +249,31 @@ var getAllGroups = function(req, res) {
         var groupDetails = user.groups;
         var groupIds = groupDetails.map(x => x.groupId);
 
-        Group.find({ _id: { $in: groupIds } }, function(err, groups) {
-          if (!err) {
-            groupDetails.forEach(function(groupDetail) {
-              groups.forEach(function(group) {
-                if (groupDetail.groupId == group._id) {
-                  groupDetail.details = group;
-                }
+        Group.find({ _id: { $in: groupIds } })
+          .lean()
+          .exec(function(err, groups) {
+            if (!err) {
+              // ensures groupDetails are retured in the same order as 
+              // they were in the user.groups array
+              groupDetails.forEach(function(groupDetail) {
+                groups.forEach(function(group) {
+                  if (groupDetail.groupId == group._id) {
+                    groupDetail.details = group;
+                  }
+                });
               });
-            });
-            res.send(groupDetails);
-          } else {
-            res.status(404).send("No groups found.");
-          }
-        });
+              // attach admin name and profilepic
+              addAllAdmins(groupDetails)
+                .then(() => {
+                  res.send(groupDetails);
+                })
+                .catch(() => {
+                  res.status(500);
+                });
+            } else {
+              res.status(404).send("No groups found.");
+            }
+          });
       } else {
         res.status(404).send("User not found.");
       }
