@@ -6,10 +6,10 @@ const Artefact = mongoose.model("Artefact");
 const Comment = mongoose.model("Comment");
 // load User model
 const User = mongoose.model("User");
-
+// load Group model
 const Group = mongoose.model("Group");
-
-const trigger = require("../services/notification/triggers");
+// notification triggers
+const triggers = require("../services/notification/triggers");
 
 // get all artefacts
 var getAll = function(req, res) {
@@ -41,7 +41,7 @@ var deleteById = function(req, res) {
   var artefactId = req.params.id;
   // try to find the group that's associated with the artefact
   //prettier-ignore
-  Group.findOne({artefacts: { $elemMatch: { artefactId }}}, function(err, group) {
+  Group.findOne({ artefacts: { $elemMatch: { artefactId }}}, function(err, group) {
     if (!err) {
       // such group exist, therefore remove the association
       if (group) {
@@ -57,6 +57,9 @@ var deleteById = function(req, res) {
   // find and delete artefact by id
   Artefact.findByIdAndDelete(artefactId, function(err, artefact) {
     if (!err) {
+      // delete all associated notifications
+      triggers.deleteAllArtefactNotif(artefactId);
+      // response
       res.send(artefactId + " is deleted");
     } else {
       res.sendStatus(404);
@@ -159,9 +162,9 @@ var like = function(req, res) {
         artefact.save();
         res.send(artefact);
         // trigger notification
-        trigger.triggerArtefactNotification(artefactId, userId);
-        // other user has already liked the artefact
+        triggers.triggerArtefactNotif(artefactId, userId, "like");
       } else {
+        // other user has already liked the artefact
         res.status(400).send("User already liked this artefact");
       }
     } else {
@@ -184,8 +187,10 @@ var unlike = function(req, res) {
         artefact.likes = likes;
         artefact.save();
         res.send(artefact);
-        // user hasn't liked the artefact before
+        // delete previous artefact-liked notification
+        triggers.deleteArtefactLikeNotif(artefactId, userId);
       } else {
+        // user hasn't liked the artefact before
         res.status(404).send("User has not liked this artefact.");
       }
     } else {
@@ -295,7 +300,7 @@ var postComment = function(req, res) {
     if (!err) {
       res.send(newComment);
       // trigger notification
-      trigger.triggerArtefactNotification(artefactId, userId, newComment);
+      triggers.triggerArtefactNotif(artefactId, userId, "comment");
     } else {
       res.status(400).send(err);
     }
