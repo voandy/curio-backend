@@ -68,19 +68,23 @@ var updateById = function(req, res) {
     // Hash password before saving in database
     bcrypt.genSalt(10, (err, salt) => {
       bcrypt.hash(req.body.password, salt, (err, hash) => {
-        if (err) throw err;
         req.body.password = hash;
+
+        if (!err) {
+          User.findByIdAndUpdate(userId, req.body, function(err, user) {
+            if (!err) {
+              res.send(userId + "is updated");
+            } else {
+              res.sendStatus(404);
+            }
+          });
+        }
+        else {
+          throw err;
+        }
       });
     });
-  }
-
-  User.findByIdAndUpdate(userId, req.body, function(err, user) {
-    if (!err) {
-      res.send(userId + "is updated");
-    } else {
-      res.sendStatus(404);
-    }
-  });
+  }  
 };
 
 // get user by email
