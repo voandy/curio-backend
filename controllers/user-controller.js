@@ -111,7 +111,7 @@ var getByUsername = function(req, res) {
   });
 };
 
-// @route POST api/user/register
+// @route POST api/register
 // @desc Register user
 // @access Public
 var register = function(req, res) {
@@ -164,7 +164,7 @@ var register = function(req, res) {
   });
 };
 
-// @route POST api/users/login
+// @route POST api/login
 // @desc Login user and return JWT token
 // @access Public
 var login = function(req, res) {
