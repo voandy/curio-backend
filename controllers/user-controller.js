@@ -15,6 +15,7 @@ const secretOrKey = process.env.secretOrKey;
 // load input validation
 const validateRegisterInput = require("../services/validation/register");
 const validateLoginInput = require("../services/validation/login");
+const validateEditInput = require("../services/validation/edit");
 
 // get all users
 var getAll = function(req, res) {
@@ -54,6 +55,25 @@ var deleteById = function(req, res) {
 // update user by id
 var updateById = function(req, res) {
   var userId = req.params.id;
+
+  // Form validation
+  const { errors, isValid } = validateEditInput(req.body);
+
+  // Check validation
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
+  if (req.body.password) {
+    // Hash password before saving in database
+    bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(req.body.password, salt, (err, hash) => {
+        if (err) throw err;
+        req.body.password = hash;
+      });
+    });
+  }
+
   User.findByIdAndUpdate(userId, req.body, function(err, user) {
     if (!err) {
       res.send(userId + "is updated");
