@@ -84,7 +84,15 @@ var updateById = function(req, res) {
         }
       });
     });
-  }  
+  }
+  
+  User.findByIdAndUpdate(userId, req.body, function(err, user) {
+    if (!err) {
+      res.send(userId + "is updated");
+    } else {
+      res.sendStatus(404);
+    }
+  });
 };
 
 // get user by email
