@@ -56,15 +56,16 @@ var deleteById = function(req, res) {
 var updateById = function(req, res) {
   var userId = req.params.id;
 
-  // Form validation
-  const { errors, isValid } = validateEditInput(req.body);
-
-  // Check validation
-  if (!isValid) {
-    return res.status(400).json(errors);
-  }
-
   if (req.body.password) {
+
+    // edit validation
+    const { errors, isValid } = validateEditInput(req.body);
+
+    // Check validation
+    if (!isValid) {
+      return res.status(400).json(errors);
+    }
+
     // Hash password before saving in database
     bcrypt.genSalt(10, (err, salt) => {
       bcrypt.hash(req.body.password, salt, (err, hash) => {
