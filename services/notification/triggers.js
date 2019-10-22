@@ -108,12 +108,14 @@ const sendArtefactNotif = function(artefact, target, artefactActor, artefactOwne
       message = `${artefactActor.name} added ${artefact.title} to group: ${group.title}`;
       break;
   }
+  // allow empty string to be the thumbnail
+  let thumbnailURL = artefactActor.profilePic ? artefactActor.profilePic : "";
   // prepare the new notification
   var notification = new Notification({
     userId: target._id,
     userPushToken: target.userPushToken,
     datePosted: new Date(),
-    thumbnailURL: artefactActor.profilePic,
+    thumbnailURL,
     seenStatus: false,
     category: "artefact",
     refId: artefact._id,
@@ -197,14 +199,14 @@ const triggerInvitationNotif = function(groupId, userId, type) {
             message = `${admin.name} invited you to join group: ${group.title}`;
             userId = target._id;
             userPushToken = target.userPushToken;
-            thumbnailURL = admin.profilePic;
+            thumbnailURL = admin.profilePic ? admin.profilePic : "";
             otherUser = admin._id;
             break;
           case "accept":
             message =`${target.name} has accepted your invitation to join group: ${group.title}`;
             userId = admin._id;
             userPushToken = admin.userPushToken;
-            thumbnailURL = target.profilePic;
+            thumbnailURL = target.profilePic ? target.profilePic : "";
             otherUser = target._id;
             break;
           default:

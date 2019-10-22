@@ -12,7 +12,7 @@ const notificationSchema = new Schema({
     otherUser: { type: String, required: true }
   },
 
-  thumbnailURL: { type: String, required: true },
+  thumbnailURL: { type: String, default: "" },
   seenStatus: { type: Boolean, required: true, default: false },
 
   category: { type: String, required: true },
